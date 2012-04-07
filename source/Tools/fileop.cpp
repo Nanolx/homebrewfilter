@@ -13,29 +13,23 @@
 #include <ogc/machine/processor.h>
 #include <ntfs.h>
 #include <fat.h>
-#include <ext2.h>
 #include <sdcard/wiisd_io.h>
 #include <ogc/usbstorage.h>
 #include <dirent.h>
-#include <di/di.h>
 
 #include "fileop.h"
 #include "main.h"
 #include "Tools/app_list.h"
 #include "Tools/copy_app_in_category.h"
 #include "Tools/throbber.h"
-#include "DiskOperations/iso.h"
-#include "DiskOperations/di2.h"
 
 static const DISC_INTERFACE* sd = &__io_wiisd;
 static const DISC_INTERFACE* usb = &__io_usbstorage;
-static const DISC_INTERFACE* dvd = &__io_wiidvd;
 
 enum
 {
 	DEVICE_SD,
-	DEVICE_USB,
-	DEVICE_DVD
+	DEVICE_USB
 };
 
 static char prefix[2][4] = { "sd", "usb" };
@@ -48,18 +42,13 @@ static char prefix[2][4] = { "sd", "usb" };
 
 #define le32_to_cpu(x) bswap32(x)
 
-#define BYTES_PER_SECTOR 4096
+#define BYTES_PER_SECTOR 512
 #define NTFS_OEM_ID                         (0x4e54465320202020ULL)
 
 #define PARTITION_TYPE_EMPTY                0x00 /* Empty */
 #define PARTITION_TYPE_DOS33_EXTENDED       0x05 /* DOS 3.3+ extended partition */
 #define PARTITION_TYPE_NTFS                 0x07 /* Windows NT NTFS */
 #define PARTITION_TYPE_WIN95_EXTENDED       0x0F /* Windows 95 extended partition */
-
-#define PARTITION_TYPE_LINUX		    0x83 /* GNU/Linux partition */
-#define PARTITION_TYPE_LINUX_SWAP	    0x82 /* GNU/Linux Swap partition */
-#define PARTITION_TYPE_LINUX_LVM	    0x8e /* GNU/Linux logical volume manager partition */
-#define PARTITION_TYPE_LINUX_LUKS	    0xe8 /* GNU/Linux LUKS partition */
 
 #define PARTITION_STATUS_NONBOOTABLE        0x00 /* Non-bootable */
 #define PARTITION_STATUS_BOOTABLE           0x80 /* Bootable (active) */
@@ -70,10 +59,8 @@ static char prefix[2][4] = { "sd", "usb" };
 #define BPB_FAT16_fileSysType  0x36
 #define BPB_FAT32_fileSysType  0x52
 
-#define T_FAT     1
-#define T_NTFS    2
-#define T_EXT2    3
-#define T_ISO9660 4
+#define T_FAT  1
+#define T_NTFS 2
 
 static const char FAT_SIG[3] = {'F', 'A', 'T'};
 
@@ -169,14 +156,8 @@ static void AddPartition(sec_t sector, int device, int type, int *devnum)
 
 	DISC_INTERFACE *disc = (DISC_INTERFACE *)sd;
 
-	if (device == DEVICE_USB)
-	{
+	if(device == DEVICE_USB)
 		disc = (DISC_INTERFACE *)usb;
-	}
-	else if (device == DEVICE_DVD)
-	{
-		disc = (DISC_INTERFACE *)dvd;
-	}
 
 	char mount[10];
 	sprintf(mount, "%s%i", prefix[device], *devnum+1);
@@ -187,7 +168,7 @@ static void AddPartition(sec_t sector, int device, int type, int *devnum)
 			return;
 		fatGetVolumeLabel(mount, part[device][*devnum].name);
 	}
-	else if (type == T_NTFS)
+	else
 	{
 		if(!ntfsMount(mount, disc, sector, 8, 64, NTFS_DEFAULT | NTFS_RECOVER))
 			return;
@@ -198,27 +179,6 @@ static void AddPartition(sec_t sector, int device, int type, int *devnum)
 			strcpy(part[device][*devnum].name, name);
 		else
 			part[device][*devnum].name[0] = 0;
-	}
-	else if (type == T_EXT2)
-	{
-		if(!ext2Mount(mount, disc, sector, 8, 64, EXT2_FLAG_64BITS | EXT2_FLAG_JOURNAL_DEV_OK))
-			return;
-
-		const char *name = ext2GetVolumeName(mount);
-
-		if(name)
-			strcpy(part[device][*devnum].name, name);
-		else
-			part[device][*devnum].name[0] = 0;
-	}
-	else if (type == T_ISO9660)
-	{
-
-		if (!MountDVD())
-			return;
-
-		strcpy(part[device][*devnum].name, "DVD");
-
 	}
 
 	strcpy(part[device][*devnum].mount, mount);
@@ -284,7 +244,7 @@ static int FindPartitions(int device)
 			part_lba = le32_to_cpu(mbr.partitions[i].lba_start);
 
 			debug_printf(
-					"Partition %i: %s, sector %u, type 0x%x\n",
+					"Partition %i: %s, sector %lu, type 0x%x\n",
 					i + 1,
 					partition->status == PARTITION_STATUS_BOOTABLE ? "bootable (active)"
 							: "non-bootable", part_lba, partition->type);
@@ -332,7 +292,7 @@ static int FindPartitions(int device)
 							if (sector.ebr.signature == EBR_SIGNATURE)
 							{
 								debug_printf(
-										"Logical Partition @ %d: %s type 0x%x\n",
+										"Logical Partition @ %d: type 0x%x\n",
 										ebr_lba + next_erb_lba,
 										sector.ebr.partition.status
 												== PARTITION_STATUS_BOOTABLE ? "bootable (active)"
@@ -347,13 +307,8 @@ static int FindPartitions(int device)
 								next_erb_lba = le32_to_cpu(
 										sector.ebr.next_ebr.lba_start);
 
-								if(sector.ebr.partition.type==PARTITION_TYPE_LINUX)
-								{
-									debug_printf("Partition : type EXT2/3/4 found\n");
-									AddPartition(part_lba, device, T_EXT2, &devnum);
-								}
 								// Check if this partition has a valid NTFS boot record
-								else if (interface->readSectors(part_lba, 1, &sector))
+								if (interface->readSectors(part_lba, 1, &sector))
 								{
 									if (sector.boot.oem_id == NTFS_OEM_ID)
 									{
@@ -392,15 +347,6 @@ static int FindPartitions(int device)
 					break;
 				}
 
-				case PARTITION_TYPE_LINUX:
-				{
-					debug_printf("Partition %i: Claims to be LINUX\n", i + 1);
-
-					// Read and validate the EXT2 partition
-					AddPartition(part_lba, device, T_EXT2, &devnum);
-					break;
-				}
-
 				// Ignore empty partitions
 				case PARTITION_TYPE_EMPTY:
 					debug_printf("Partition %i: Claims to be empty\n", i + 1);
@@ -431,11 +377,6 @@ static int FindPartitions(int device)
 							debug_printf("Partition : Valid FAT boot sector found\n");
 							AddPartition(part_lba, device, T_FAT, &devnum);
 						}
-						else
-						{
-							debug_printf("Trying : EXT partition\n");
-							AddPartition(part_lba, device, T_EXT2, &devnum);
-						}
 					}
 					break;
 				}
@@ -465,11 +406,6 @@ static int FindPartitions(int device)
 					AddPartition(i, device, T_FAT, &devnum);
 					break;
 				}
-				else
-				{
-					debug_printf("Trying : EXT partition\n");
-					AddPartition(part_lba, device, T_EXT2, &devnum);
-				}
 			}
 		}
 	}
@@ -485,29 +421,14 @@ static void UnmountPartitions(int device)
 	{
 		if(part[device][i].type == T_FAT)
 		{
-			sprintf(mount, "VFAT: %s:", part[device][i].mount);
+			sprintf(mount, "%s:", part[device][i].mount);
 			fatUnmount(mount);
-			break;
 		}
 		else if(part[device][i].type == T_NTFS)
 		{
-			sprintf(mount, "NTFS: %s:", part[device][i].mount);
 			ntfsUnmount(part[device][i].mount, false);
-			break;
 		}
-		else if(part[device][i].type == T_EXT2)
-		{
-			sprintf(mount, "EXT2: %s:", part[device][i].mount);
-			ext2Unmount(part[device][i].mount);
-			break;
-		}
-		else if(part[device][i].type == T_ISO9660)
-		{
-			sprintf(mount, "ISO9660: %s:", part[device][i].mount);
-			UnMountDVD();
-			break;
-		}
-
+		
 		part[device][i].name[0] = 0;
 		part[device][i].mount[0] = 0;
 		part[device][i].sector = 0;
@@ -515,18 +436,24 @@ static void UnmountPartitions(int device)
 		part[device][i].type = 0;
 	}
 
+	if(device == DEVICE_SD)
+		sd->shutdown();
+	else
+	{
+		usb->shutdown();
+		USB_Deinitialize();
+	}
 }
 
 /****************************************************************************
  * MountPartitions
- *
+ * 
  * Shuts down the device
  * Attempts to startup the device specified and mounts all partitions
  ***************************************************************************/
 
 static bool MountPartitions(int device)
 {
-
 	const DISC_INTERFACE* disc = NULL;
 
 	switch(device)
@@ -536,9 +463,6 @@ static bool MountPartitions(int device)
 			break;
 		case DEVICE_USB:
 			disc = usb;
-			break;
-		case DEVICE_DVD:
-			disc = dvd;
 			break;
 		default:
 			return false; // unknown device
@@ -554,72 +478,11 @@ void MountAllDevices()
 {
 	if(sd->startup() && sd->isInserted())
 		MountPartitions(DEVICE_SD);
-
+		
 	usleep(250000); // 1/4 sec
 
 	if(usb->startup() && usb->isInserted())
 		MountPartitions(DEVICE_USB);
-
-	usleep(250000); // 1/4 sec
-
-	if(dvd->startup() && dvd->isInserted())
-		MountDVD();
-}
-
-bool MountDVDFS()
-{
-	bool devicemounted = ISO9660_Mount();
-
-	/*if(!devicemounted)
-		devicemounted = FST_Mount();
-	if(!devicemounted)
-		devicemounted = GCFST_Mount();*/
-
-	return devicemounted;
-}
-
-void UnMountDVD()
-{
-
-	ISO9660_Unmount();
-}
-
-bool MountDVD()
-{
-	if(!DVD_Inserted())
-		return false;
-
-	char read_buffer[2048];
-	if(DI2_ReadDVD(read_buffer, 1, 0) == 0)
-		return true;
-
-	UnMountDVD();
-	DI2_Mount();
-
-	time_t timer1, timer2;
-	timer1 = time(0);
-
-	while(DI2_GetStatus() & DVD_INIT)
-	{
-		timer2 = time(0);
-		if(timer2-timer1 > 15)
-			return false;
-
-		usleep(5000);
-	}
-
-	return MountDVDFS();
-}
-
-bool DVD_Inserted()
-{
-	uint32_t cover = 0;
-	DI2_GetCoverRegister(&cover);
-
-	if(cover & DVD_COVER_DISC_INSERTED)
-		return true;
-
-	return false;
 }
 
 void UnmountAllDevices()
@@ -637,7 +500,7 @@ void check_sd()
 {
 	if(Settings.sd_insert <= 0)
 	{
-
+		
 		if(sd->startup() && sd->isInserted())		// wenn sd karte gefunden, neu einlesen
 		{
 			MountPartitions(DEVICE_SD);
@@ -646,7 +509,7 @@ void check_sd()
 	}
 	else if(Settings.sd_insert == 1)
 	{
-		if(!SDCard_Inserted())				// wenn sd karte nicht gefunden, beenden
+		if(!SDCard_Inserted())						// wenn sd karte nicht gefunden, beenden
 		{
 			UnmountPartitions(DEVICE_SD);
 			Settings.sd_insert = -1;
@@ -663,7 +526,7 @@ void check_usb()
 {
 	if(Settings.usb_insert <= 0)
 	{
-		if(usb->startup() && usb->isInserted())		// wenn usb gerät gefunden, neu einlesen
+		if(usb->startup() && usb->isInserted())	// wenn usb gerät gefunden, neu einlesen
 		{
 			MountPartitions(DEVICE_USB);
 			Settings.usb_insert = 2;
@@ -671,31 +534,10 @@ void check_usb()
 	}
 	else if(Settings.usb_insert == 1)
 	{
-		if(!USBDevice_Inserted())			// wenn usb gerät nicht mehr gefunden, beenden
+		if(!USBDevice_Inserted())					// wenn usb gerät nicht mehr gefunden, beenden
 		{
 			UnmountPartitions(DEVICE_USB);
 			Settings.usb_insert = -1;
-		}
-	}
-}
-
-void check_dvd()
-{
-	if(Settings.dvd_insert <= 0)
-	{
-
-		if(DVD_Inserted())		// wenn dvd gefunden, neu einlesen
-		{
-			MountDVD();
-			Settings.dvd_insert = 2;
-		}
-	}
-	else if(Settings.dvd_insert == 1)
-	{
-		if(!DVD_Inserted())				// wenn dvd nicht gefunden, beenden
-		{
-			UnMountDVD();
-			Settings.dvd_insert = -1;
 		}
 	}
 }
@@ -710,37 +552,32 @@ void check_device()
 		copy_app_in_category();
 	else
 		copy_app_in_unassigned();
-
+		
 	if(Settings.sd_insert == 2)
 		Settings.sd_insert = 1;
 	else if(Settings.sd_insert == -1)
 		Settings.sd_insert = 0;
-
+		
 	if(Settings.usb_insert == 2)
 		Settings.usb_insert = 1;
 	else if(Settings.usb_insert == -1)
 		Settings.usb_insert = 0;
-
-	if(Settings.dvd_insert == 2)
-		Settings.dvd_insert = 1;
-	else if(Settings.dvd_insert == -1)
-		Settings.dvd_insert = 0;
-
+		
 	HaltThrobberThread();
 }
 
 string check_path(string old_path)
-{
+{	
 	DIR *dirHandle;
 	struct dirent * dirEntry;
-
+	
 	if(old_path.length() > 0 && old_path.substr(old_path.length() -1) != "/")
 		old_path += "/";
 
 	string new_path = old_path.substr(0, old_path.find(":/") +2);
 	old_path.erase(0, old_path.find("/") +1);
 	string search;
-
+	
 	while((signed)old_path.find("/") != -1)
 	{
 		search = old_path.substr(0, old_path.find("/"));
@@ -759,7 +596,7 @@ string check_path(string old_path)
 			new_path += "/";
 			closedir(dirHandle);
 		}
-
+		
 		old_path.erase(0, old_path.find("/") +1);
 	}
 

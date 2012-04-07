@@ -53,13 +53,13 @@ void load()
 		if (get_setting(source, "theme") != "")
 		{
 			sprintf (Options.theme, get_setting(source, "theme").c_str());
-			theme(check_path(Settings.device_dat + ":/config/HBF/themes/") + Options.theme + "/");
+			theme(check_path(Settings.device_dat + ":/config/Homebrew Filter/themes/") + Options.theme + "/");
 		}
 		
 		if(get_setting(source, "language") != "")
 		{
 			sprintf (Options.language, get_setting(source, "language").c_str());
-			ini_Open(check_path(Settings.device_dat + ":/config/HBF/languages/") + Options.language + ".lang");
+			ini_Open(check_path(Settings.device_dat + ":/config/Homebrew Filter/languages/") + Options.language + ".lang");
 			AvailableCategory.categories[0] = tr(Settings.category_name_all);
 		}
 		
@@ -96,10 +96,10 @@ void load()
 		
 		if(get_setting(source, "quick_start") != "")
 			Options.quick_start = atoi(get_setting(source, "quick_start").c_str());
-
+		
 		if(get_setting(source, "show_all") != "")
 			Options.show_all = atoi(get_setting(source, "show_all").c_str());
-
+		
 		if(get_setting(source, "navigation") != "")
 			Options.navigation = atoi(get_setting(source, "navigation").c_str());
 		
@@ -122,7 +122,7 @@ void load()
 		}
 		
 		if(get_setting(source, "grid") != "")
-			Settings.grid = atoi(get_setting(source, "grid").c_str());
+			Settings.view = atoi(get_setting(source, "grid").c_str());
 			
 		if(get_setting(source, "device") != "")
 			Settings.device = get_setting(source, "device");

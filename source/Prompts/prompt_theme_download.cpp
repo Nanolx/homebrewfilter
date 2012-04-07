@@ -6,7 +6,6 @@
 #include "main.h"
 
 #include "Tools/textline.h"
-#include "Tools/save.h"
 
 #include "Network/network.h"
 #include "Network/update.h"
@@ -85,27 +84,35 @@ void themeDownload(string themename)
 	ResumeGui();
 
 	char buffer[100];
-	sprintf(buffer, "http://www.nanolx.org/hbf/Themes/%s/filelist", themename.c_str());	
-	
+	// download counter
+	sprintf(buffer, "http://hbf.hamachi-mp.bplaced.net/Themes/counter.php?theme=%s", themename.c_str());	
 	struct block file = downloadfile(buffer);
+
+	sprintf(buffer, "http://hbf.hamachi-mp.bplaced.net/Themes/index.php?path=Themes/%s", themename.c_str());	
+	file = downloadfile(buffer);
 	if (file.data != NULL)
 	{
 		string source_themes = (char*)file.data;
 	
 		vector<string> themes;
+		source_themes.erase(0, source_themes.find("?path=Themes"));
 	
 		while(1)
 		{
 			if((signed)source_themes.find(themename.c_str()) == -1)
 				break;
 				
-			source_themes.erase(0, source_themes.find(themename.c_str()) + themename.length() +6);
+			source_themes.erase(0, source_themes.find(themename.c_str()) + themename.length() +1);
+			
+			if(source_themes.substr(0, source_themes.find("\"")) == "amp;name=settings.xml")
+				themes.push_back(source_themes.substr(9, source_themes.find("\"") -9));
+			else
+				themes.push_back(source_themes.substr(0, source_themes.find("\"")));
 
-			themes.push_back(source_themes.substr(0, source_themes.find("+")));
-
-			source_themes.erase(0, source_themes.find("+"));
+			source_themes.erase(0, source_themes.find("\""));
 
 		}
+		
 		
 		for(int i = 0; i < (signed)themes.size(); i++)
 		{
@@ -116,8 +123,7 @@ void themeDownload(string themename)
 		
 		free(file.data);
 	}
-	
-	
+
 	msgTxt.SetText("");
 	downloadTxt.SetText(tr("finished"));
 
@@ -144,7 +150,7 @@ string ThemeList()
 	bool stop = false;
 	
 	char buffer[100];
-	sprintf(buffer, "http://www.nanolx.org/hbf/Themes/");	
+	sprintf(buffer, "http://hbf.hamachi-mp.bplaced.net/Themes/");	
 
 	struct block file = downloadfile(buffer);
 	if (file.data != NULL)
@@ -154,16 +160,16 @@ string ThemeList()
 		
 		while(1)
 		{
-			if((signed)source_themes.find("../Themes/") == -1)
+			if((signed)source_themes.find("?path=Themes/") == -1)
 				break;
 				
-			source_themes.erase(0, source_themes.find("../Themes/"));
-			source_themes.erase(0, source_themes.find("s/") +2);
-
+			source_themes.erase(0, source_themes.find("?path=Themes/"));
+			source_themes.erase(0, source_themes.find("/") +1);
+			
 			if(source_themes.substr(0, source_themes.find("\"")) != "_HBF_")
 				themes.push_back(source_themes.substr(0, source_themes.find("\"")));
 			
-			source_themes.erase(0, source_themes.find("<"));
+			source_themes.erase(0, source_themes.find("download.php"));
 		}
 		
 		free(file.data);

@@ -86,11 +86,11 @@ void languageDownload(string languagename)
 
 	char buffer[100];
 	msgTxt.SetText(languagename.c_str());
-	sprintf(buffer, "http://www.nanolx.org/hbf/Languages/%s", languagename.c_str());	
+	sprintf(buffer, "http://hbf.hamachi-mp.bplaced.net/Languages/%s", languagename.c_str());	
 	struct block file = downloadfile(buffer);
 	if (file.data && file.size > 0 && folder_exists())
 	{
-		FILE * data = fopen((Settings.device_dat + ":/config/HBF/Languages/"+ languagename).c_str(), "wb");
+		FILE * data = fopen((Settings.device_dat + ":/config/Homebrew Filter/Languages/"+ languagename).c_str(), "wb");
 		if(data)
 		{
 			fwrite(file.data, 1, file.size, data);
@@ -126,7 +126,7 @@ string LanguageList()
 	bool stop = false;
 	
 	char buffer[100];
-	sprintf(buffer, "http://www.nanolx.org/hbf/Languages/");	
+	sprintf(buffer, "http://hbf.hamachi-mp.bplaced.net/Languages/");	
 
 	struct block file = downloadfile(buffer);
 	if (file.data != NULL)

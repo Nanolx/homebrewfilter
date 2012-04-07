@@ -2,6 +2,8 @@
 #ifndef _PROMPTS_H_
 #define _PROMPTS_H_
 
+#include "main.h"
+
 #include <string>
 using namespace std;
 
@@ -16,11 +18,15 @@ bool RemoveApp(const char *AppName);
 bool MetaEdit(string dir);
 
 int AppInfo(const char *title, string dir, u8* icon);
+int ChoiceAppInfo(vector<homebrew_list> list, int i);
 int devicePrompt();
-int loaderPrompt();
 int endPrompt();
+int menuPrompt();
 int sortPrompt();
+int startmenuPrompt(int &CategoryNr, int &AppNr);
+int startmenu2Prompt();
 int systemPrompt();
+int viewPrompt();
 int WindowPrompt(const char *title, const char *msg, const char *btn1Label, const char *btn2Label = NULL);
 
 void debug(const char *msg);

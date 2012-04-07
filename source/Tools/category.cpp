@@ -46,7 +46,7 @@ void AvailableCategoryLoad(string pfad)
 		AvailableCategory.apps[i].clear();
 		// Kategorie durchsuchen
 		temp = source.erase(0,source.find("[") +1);
-		AvailableCategory.categories.push_back(source.substr(0, source.find("]")));
+		AvailableCategory.categories.push_back(source.substr(0, source.find("]")).c_str());
 		temp = source.erase(0,source.find("]") +1);
 		if((signed)temp.find("[") != -1)
 			temp.erase(temp.find("["));

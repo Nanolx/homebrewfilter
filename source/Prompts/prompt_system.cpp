@@ -25,6 +25,8 @@ int systemPrompt()
 	GuiWindow promptWindow(144,64);
 	promptWindow.SetAlignment(ALIGN_CENTRE, ALIGN_TOP);
 	promptWindow.SetPosition(-185, 280);
+	if(Options.apps == 5)
+		promptWindow.SetPosition(-185, 307);
 	GuiTrigger trigA;
 	GuiTrigger trigB;
 	trigA.SetSimpleTrigger(-1, WPAD_BUTTON_A | WPAD_CLASSIC_BUTTON_A, PAD_BUTTON_A);

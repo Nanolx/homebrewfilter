@@ -16,7 +16,6 @@ u8 *data = (u8 *)0x92000000;
 /*** Extern variables ***/
 extern GuiWindow * mainWindow;
 extern bool boot_buffer;
-extern bool wiiload;
 
 /*** Extern functions ***/
 extern void ResumeGui();
@@ -114,7 +113,7 @@ void HaltTcpThread()
 
 static void * tcp_callback(void *arg)
 {
-	u32 offset, read, size, client, uncfilesize;
+	u32 offset, read, size, ip, client, uncfilesize;
 	u8 *bfr[READ_SIZE];
 	bool compress = false;
 	struct sockaddr_in addr;
@@ -207,14 +206,16 @@ static void * tcp_callback(void *arg)
 					Percent = 100.0f * offset/size;
 					progressbarImg->SetSize(Percent*3.27f, 38);
 					
-					char buffer[6];
+					char buffer[7];
 					sprintf(buffer, "%i %%", (int)Percent);
 					PercentTxt->SetText(buffer);
 				}
+				
 				usleep(100000);
 				net_close(client);
 				net_close(listen);
 				
+//	retry:				
 				if(compress)
 				{
 					u8 *zdata = (u8 *) malloc(uncfilesize);
@@ -222,14 +223,17 @@ static void * tcp_callback(void *arg)
 						return NULL;
 					
 					uLongf zdatalen = uncfilesize;
-					
 					int res = uncompress (zdata, &zdatalen, data, (uLongf)size);
-
+					
 					if (res != Z_OK)
 					{
 						free(zdata);
-			//			fprintf (stderr, "error decompressing data: %d\n", res);
-						return NULL;
+//	debug("error");
+//	PercentTxt->SetText("error");
+//	return NULL;
+//	goto retry;
+		//			fprintf (stderr, "error decompressing data: %d\n", res);
+	//					return NULL;
 					}
 					else
 					{
@@ -252,7 +256,6 @@ static void * tcp_callback(void *arg)
 				ResumeGui();
 
 				boot_buffer = true;
-				wiiload = true;
 				break;
 			}
 		}

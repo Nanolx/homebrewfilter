@@ -42,16 +42,12 @@ int MenuMain()
 	bool vor = false;
 
 	int app_pos = -1;
-	int apps_row = 3;
-	int apps_numers = Options.apps * apps_row;
+	int apps_row = 1;
+	int apps_numers = Options.apps;
+	int gesamt_apps;
 
-	GuiTrigger trigA;
-	GuiTrigger trigB;
-	trigA.SetSimpleTrigger(-1, WPAD_BUTTON_A | WPAD_CLASSIC_BUTTON_A, PAD_BUTTON_A);
-	trigB.SetSimpleTrigger(-1, WPAD_BUTTON_B | WPAD_CLASSIC_BUTTON_B, PAD_BUTTON_B);
-
-	const u8* temp_apps_btn			= NULL;
-	const u8* temp_apps_btnOver		= NULL;
+	const u8* temp_apps_btn				= NULL;
+	const u8* temp_apps_btnOver			= NULL;
 	const u8* temp_normal_grid_inactive	= NULL;
 	const u8* temp_normal_grid_active	= NULL;
 	const u8* temp_sd_usb_active		= NULL;
@@ -59,34 +55,108 @@ int MenuMain()
 	const u8* temp_wii_gc_active		= NULL;
 	const u8* temp_wii_gc_inactive		= NULL;
 
+	GuiTrigger trigA;
+	GuiTrigger trigB;
+	trigA.SetSimpleTrigger(-1, WPAD_BUTTON_A | WPAD_CLASSIC_BUTTON_A, PAD_BUTTON_A);
+	trigB.SetSimpleTrigger(-1, WPAD_BUTTON_B | WPAD_CLASSIC_BUTTON_B, PAD_BUTTON_B);
+
+	/************************************************************************
+	 * Kategorien pro auswahl
+	 ***********************************************************************/
+	if(Settings.unassigned)
+	{
+		vechomebrew_list_choice = vechomebrew_list_unassigned;
+		// Kategoriename
+		Settings.category_name = tr(Settings.category_name_all);
+		Settings.category_name += " - ";
+		Settings.category_name += tr("unassigned");
+	}
+	else if(Settings.view == 2)
+	{
+//		vechomebrew_list_choice = vechomebrew_list_pc;
+	}
+	else
+	{
+		// Kategorie Alle nur anzeigen, wenn aktiviert oder keine andere vorhanden ist
+		if(!Options.show_all && Settings.current_category == 0 && AvailableCategory.categories.size() -1 > 0)
+			Settings.current_category++;
+
+		vechomebrew_list_choice = vechomebrew_list_category[Settings.current_category];
+		// Kategoriename
+		Settings.category_name = AvailableCategory.categories[Settings.current_category];
+	}
+	gesamt_apps = vechomebrew_list_choice.size();
+
+
+	// Kategorie button unt text
+	GuiText categoryTxt(Settings.category_name.c_str(), 28, (GXColor){Theme.category_1, Theme.category_2, Theme.category_3, 255});
+	categoryTxt.SetAlignment(ALIGN_CENTRE, ALIGN_TOP);
+	categoryTxt.SetPosition(0,30);
+
+	GuiButton categoryBtn(categoryTxt.GetTextWidth(), 28);
+	categoryBtn.SetAlignment(ALIGN_CENTRE, ALIGN_TOP);
+	categoryBtn.SetPosition(0, 30);
+	categoryBtn.SetTrigger(&trigA);
+	categoryBtn.SetTrigger(&trigB);
+
+	// HBF und Inhaber
+	GuiImageData LogoHomebrewFilterImgData(LogoHomebrewFilter_png);
+	GuiImage LogoHomebrewFilterImg(&LogoHomebrewFilterImgData);
+	LogoHomebrewFilterImg.SetAlignment(ALIGN_LEFT, ALIGN_TOP);
+	LogoHomebrewFilterImg.SetPosition(30, 420);
+	LogoHomebrewFilterImg.SetScale(0.65);
+
+	GuiText ownerTxt("hamachi-mp", 18, (GXColor){Theme.owner_1, Theme.owner_2, Theme.owner_3, 255});
+	ownerTxt.SetAlignment(ALIGN_RIGHT, ALIGN_TOP);
+	ownerTxt.SetPosition(-35,430);
+
 	/************************************************************************
 	 * icons zuweisen
 	 ***********************************************************************/
 
-	// normal / grid ansicht
-	if(Settings.grid)
-	{
-		temp_apps_btn = Theme.apps_grid;
-		temp_apps_btnOver = Theme.apps_grid_hover;
-
-		// symbol für normale ansicht
-		temp_normal_grid_inactive = Theme.grid_inactive;
-		temp_normal_grid_active = Theme.grid_active;
-	}
-	else if(!Settings.grid)
+	// normal, grid und pc ansicht
+	if(Settings.view == 0)
 	{
 		temp_apps_btn = Theme.apps_list;
 		temp_apps_btnOver = Theme.apps_list_hover;
 
-		// symbol für grid ansicht
+		// symbol für normale ansicht
 		temp_normal_grid_inactive = Theme.normal_inactive;
 		temp_normal_grid_active = Theme.normal_active;
+	}
+	else if(Settings.view == 1)
+	{
+		temp_apps_btn = Theme.apps_grid;
+		temp_apps_btnOver = Theme.apps_grid_hover;
 
-		apps_numers = Options.apps;
-		apps_row = 1;
+		// symbol für grid ansicht
+		temp_normal_grid_inactive = Theme.grid_inactive;
+		temp_normal_grid_active = Theme.grid_active;
+
+		apps_row = 3;
+		apps_numers = Options.apps * apps_row;
+	}
+	else if(Settings.view == 2)
+	{
+		temp_apps_btn = Theme.apps_grid;
+		temp_apps_btnOver = Theme.apps_grid_hover;
+
+		// symbol für pc ansicht
+		temp_normal_grid_inactive = Theme.grid_inactive;
+		temp_normal_grid_active = Theme.grid_active;
+
+		apps_row = 5;
+		apps_numers = 8 * apps_row;
+	//	gesamt_apps = apps_numers;
+
+		LogoHomebrewFilterImg.SetAlignment(ALIGN_CENTRE, ALIGN_BOTTOM);
+		LogoHomebrewFilterImg.SetPosition(45, -15);
+
+		ownerTxt.SetAlignment(ALIGN_RIGHT, ALIGN_BOTTOM);
+		ownerTxt.SetPosition(-35, -20);
 	}
 
-	// sd / usb / dvd Ansicht
+	// sd / usb ansicht
 	if(Settings.device == "sd1")
 	{
 		temp_sd_usb_active = Theme.sd_active;
@@ -101,16 +171,6 @@ int MenuMain()
 	{
 		temp_sd_usb_active = Theme.sd_usb_active;
 		temp_sd_usb_inactive = Theme.sd_usb_inactive;
-	}
-	else if(Settings.device == "dvd")
-	{
-		temp_sd_usb_active = Theme.dvd_active;
-		temp_sd_usb_inactive = Theme.dvd_inactive;
-	}
-	else if(Settings.device == "all")
-	{
-		temp_sd_usb_active = Theme.all_active;
-		temp_sd_usb_inactive = Theme.all_inactive;
 	}
 
 	// wii / gc ansicht
@@ -130,54 +190,11 @@ int MenuMain()
 		temp_wii_gc_inactive = Theme.wii_gc_inactive;
 	}
 
-	// Seite der zuletzt gestarteten app
-	if(Settings.last_app_pos != -1)
-	{
-		Settings.current_page = Settings.last_app_pos/apps_numers +1;
-		app_pos = Settings.last_app_pos;
-		Settings.last_app_pos = -1;
-	}
+	/************************************************************************
+	 * bilder und buttons
+	 ***********************************************************************/
 
-	if(Settings.unassigned)
-	{
-		vechomebrew_list_choice = vechomebrew_list_unassigned;
-		// Kategoriename
-		Settings.category_name = tr(Settings.category_name_all);
-		Settings.category_name += " - ";
-		Settings.category_name += tr("unassigned");
-	}
-	else
-	{
-		// Kategorie Alle nur anzeigen, wenn aktiviert oder keine andere vorhanden ist
-		if(!Options.show_all && Settings.current_category == 0 && AvailableCategory.categories.size() -1 > 0)
-			Settings.current_category++;
-
-		vechomebrew_list_choice = vechomebrew_list_category[Settings.current_category];
-		// Kategoriename
-		Settings.category_name = AvailableCategory.categories[Settings.current_category];
-	}
-
-	GuiText categoryTxt(Settings.category_name.c_str(), 28, (GXColor){Theme.category_1, Theme.category_2, Theme.category_3, 255});
-	categoryTxt.SetAlignment(ALIGN_CENTRE, ALIGN_TOP);
-	categoryTxt.SetPosition(0,30);
-
-	GuiButton categoryBtn(categoryTxt.GetTextWidth(), 28);
-	categoryBtn.SetAlignment(ALIGN_CENTRE, ALIGN_TOP);
-	categoryBtn.SetPosition(0, 30);
-	categoryBtn.SetTrigger(&trigA);
-	categoryBtn.SetTrigger(&trigB);
-
-	GuiImageData LogoHomebrewFilterImgData(LogoHomebrewFilter_png);
-	GuiImage LogoHomebrewFilterImg(&LogoHomebrewFilterImgData);
-	LogoHomebrewFilterImg.SetAlignment(ALIGN_LEFT, ALIGN_TOP);
-	LogoHomebrewFilterImg.SetPosition(30, 420);
-	LogoHomebrewFilterImg.SetScale(0.65);
-
-	GuiText ownerTxt("Nano", 18, (GXColor){Theme.owner_1, Theme.owner_2, Theme.owner_3, 255});
-	ownerTxt.SetAlignment(ALIGN_RIGHT, ALIGN_TOP);
-	ownerTxt.SetPosition(-35,430);
-
-	// button data
+	// image data
 	GuiImageData apps_next(Theme.apps_next);
 	GuiImageData apps_next_hover(Theme.apps_next_hover);
 	GuiImageData apps_previous(Theme.apps_previous);
@@ -196,16 +213,18 @@ int MenuMain()
 	GuiImageData wii_gc_BtnImgDataOver(temp_wii_gc_active);
 	GuiImageData power_BtnImgData(Theme.power_inactive);
 	GuiImageData power_BtnImgDataOver(Theme.power_active);
-	GuiImageData loader_BtnImgData(Theme.loader_inactive);
-	GuiImageData loader_BtnImgDataOver(Theme.loader_active);
 	GuiImageData settings_BtnImgData(Theme.settings_inactive);
 	GuiImageData settings_BtnImgDataOver(Theme.settings_active);
 	GuiImageData normal_grid_BtnImgData(temp_normal_grid_inactive);
 	GuiImageData normal_grid_BtnImgDataOver(temp_normal_grid_active);
 	GuiImageData network_BtnImgData(Theme.network_inactive);
 	GuiImageData network_BtnImgDataOver(Theme.network_active);
+	GuiImageData start_BtnImgData(Theme.button_tiny);
+	GuiImageData start_BtnImgDataOver(Theme.button_tiny_focus);
+	GuiImageData bar_ImgData(Theme.bar);
+	GuiImageData desktop_ImgData(Theme.desktop);
 
-	// button
+	// image
 	GuiImage rightBtnImg(&apps_next);
 	GuiImage leftBtnImg(&apps_previous);
 	GuiImage plusBtnImg(&apps_plus);
@@ -214,15 +233,17 @@ int MenuMain()
 	GuiImage sd_usb_BtnImg(&sd_usb_BtnImgData);
 	GuiImage wii_gc_BtnImg(&wii_gc_BtnImgData);
 	GuiImage power_BtnImg(&power_BtnImgData);
-	GuiImage loader_BtnImg(&loader_BtnImgData);
 	GuiImage settings_BtnImg(&settings_BtnImgData);
 	GuiImage normal_grid_BtnImg(&normal_grid_BtnImgData);
 	GuiImage network_BtnImg(&network_BtnImgData);
-	GuiImage * appsBtnImg[vechomebrew_list_choice.size()];
-	for(int i=0; i < (signed)vechomebrew_list_choice.size(); i++)
- 		appsBtnImg[i] = new GuiImage(&apps_btn);
+	GuiImage start_BtnImg(&start_BtnImgData);
+	GuiImage bar_Img(&bar_ImgData);
+	GuiImage desktop_Img(&desktop_ImgData);
+	GuiImage * appsBtnImg[gesamt_apps];
+	for(int i=0; i < gesamt_apps; i++)
+		appsBtnImg[i] = new GuiImage(&apps_btn);
 
-	// button over
+	// image over
 	GuiImage rightBtnImgOver(&apps_next_hover);
 	GuiImage leftBtnImgOver(&apps_previous_hover);
 	GuiImage plusBtnImgOver(&apps_plus_hover);
@@ -231,14 +252,17 @@ int MenuMain()
 	GuiImage sd_usb_BtnImgOver(&sd_usb_BtnImgDataOver);
 	GuiImage wii_gc_BtnImgOver(&wii_gc_BtnImgDataOver);
 	GuiImage power_BtnImgOver(&power_BtnImgDataOver);
-	GuiImage loader_BtnImgOver(&loader_BtnImgDataOver);
 	GuiImage settings_BtnImgOver(&settings_BtnImgDataOver);
 	GuiImage normal_grid_BtnImgOver(&normal_grid_BtnImgDataOver);
 	GuiImage network_BtnImgOver(&network_BtnImgDataOver);
-	GuiImage * appsBtnImgOver[vechomebrew_list_choice.size()];
-	for(int i=0; i < (signed)vechomebrew_list_choice.size(); i++)
- 		appsBtnImgOver[i] = new GuiImage(&apps_btnOver);
+	GuiImage start_BtnImgOver(&start_BtnImgData);
+	GuiImage * appsBtnImgOver[gesamt_apps];
+	for(int i=0; i < gesamt_apps; i++)
+		appsBtnImgOver[i] = new GuiImage(&apps_btnOver);
 
+	/************************************************************************
+	 * Buttons für seite und kategorie
+	 ***********************************************************************/
 	GuiButton rightBtn(apps_next.GetWidth(), apps_next.GetHeight());
 	rightBtn.SetAlignment(ALIGN_RIGHT, ALIGN_TOP);
 	rightBtn.SetPosition(-30, 175);
@@ -300,9 +324,9 @@ int MenuMain()
 	// normal / grid ansicht
 	GuiButton normal_grid_Btn(normal_grid_BtnImgData.GetWidth(), normal_grid_BtnImgData.GetHeight());
 	normal_grid_Btn.SetAlignment(ALIGN_CENTRE, ALIGN_TOP);
-	normal_grid_Btn.SetPosition(-25, 355);
+	normal_grid_Btn.SetPosition(0, 355);
 	if(Options.apps == 5)
-		normal_grid_Btn.SetPosition(-25, 375);
+		normal_grid_Btn.SetPosition(0, 375);
 	normal_grid_Btn.SetImage(&normal_grid_BtnImg);
 	normal_grid_Btn.SetImageOver(&normal_grid_BtnImgOver);
 	normal_grid_Btn.SetTrigger(&trigA);
@@ -311,24 +335,13 @@ int MenuMain()
 	// settings
 	GuiButton settings_Btn(settings_BtnImgData.GetWidth(), settings_BtnImgData.GetHeight());
 	settings_Btn.SetAlignment(ALIGN_CENTRE, ALIGN_TOP);
-	settings_Btn.SetPosition(25, 355);
+	settings_Btn.SetPosition(135, 355);
 	if(Options.apps == 5)
-		settings_Btn.SetPosition(25, 375);
+		settings_Btn.SetPosition(135, 375);
 	settings_Btn.SetImage(&settings_BtnImg);
 	settings_Btn.SetImageOver(&settings_BtnImgOver);
 	settings_Btn.SetTrigger(&trigA);
 	settings_Btn.SetEffectGrow();
-
-	// loader
-	GuiButton loader_Btn(loader_BtnImgData.GetWidth(), loader_BtnImgData.GetHeight());
-	loader_Btn.SetAlignment(ALIGN_CENTRE, ALIGN_TOP);
-	loader_Btn.SetPosition(135, 355);
-	if(Options.apps == 5)
-		loader_Btn.SetPosition(135, 375);
-	loader_Btn.SetImage(&loader_BtnImg);
-	loader_Btn.SetImageOver(&loader_BtnImgOver);
-	loader_Btn.SetTrigger(&trigA);
-	loader_Btn.SetEffectGrow();
 
 	// power
 	GuiButton power_Btn(power_BtnImgData.GetWidth(), power_BtnImgData.GetHeight());
@@ -355,30 +368,58 @@ int MenuMain()
 	network_Btn.SetTrigger(&trigA);
 	network_Btn.SetEffectGrow();
 
-	// alle button der kategorie erstellen
-	GuiWindow Apps(screenwidth, screenheight);
-	GuiButton * AppsBtn[vechomebrew_list_choice.size()];
+	// pc ansicht
+	GuiButton start_Btn(start_BtnImgData.GetWidth(), start_BtnImgData.GetHeight());
+	start_Btn.SetAlignment(ALIGN_LEFT, ALIGN_BOTTOM);
+	start_Btn.SetPosition(6, -6);
+	start_Btn.SetImage(&start_BtnImg);
+	start_Btn.SetImageOver(&start_BtnImgOver);
+	start_Btn.SetTrigger(&trigA);
+	start_Btn.SetEffectGrow();
+//	start_Btn.SetScale(0.75);
+	bar_Img.SetAlignment(ALIGN_LEFT, ALIGN_BOTTOM);
+//	desktop_Img.SetAlignment(ALIGN_LEFT, ALIGN_BOTTOM);
 
+	// alle button der kategorie erstellen
+	GuiButton * AppsBtn[gesamt_apps];
+
+	// Seite der zuletzt gestarteten app
+	if(Settings.last_app_pos != -1)
+	{
+		Settings.current_page = Settings.last_app_pos/apps_numers +1;
+		app_pos = Settings.last_app_pos;
+		Settings.last_app_pos = -1;
+	}
+
+	// start position der apps buttons
 	int x = screenwidth / 2 - (apps_btn.GetWidth() * apps_row) / 2;
 	int y = 70;
 	if(Options.apps == 5)
 		y = 55;
+	if(Settings.view == 2)
+	{
+		x = screenwidth / 2 - (apps_btn.GetWidth() * apps_row) / 2 +50;
+		y = 4;
+	}
+
 	int app_grid = 0;
 
-	// position der apps
+	// position der apps fürs verschieben speichern
 	vector<int> pos_x;
 	vector<int> pos_y;
 
 	// auflisten der apps
 	int anzahl_pro_seite = 0;
-	for(int i=0; i < (signed)vechomebrew_list_choice.size(); i++)
+	for(int i=0; i < gesamt_apps; i++)
 	{
+		AppsBtn[i] = new GuiButton(apps_btn.GetWidth(), apps_btn.GetHeight());
+
 		if(anzahl_pro_seite == apps_numers)		// Apps pro Seite
 		{
 			y = 70;
 			if(Options.apps == 5)
 				y = 55;
-			anzahl_pro_seite=1;
+			anzahl_pro_seite = 1;
 			Settings.total_page++;
 		}
 		else
@@ -387,7 +428,7 @@ int MenuMain()
 		// device symbol anzeigen
 		GuiImage * viewdevice = NULL;
 
-		if((Options.device_icon == 1 || Options.device_icon == 3) && (Settings.device == "sd_usb" || Settings.device == "all"))
+		if((Options.device_icon == 1 || Options.device_icon == 3) && Settings.device == "sd_usb" && Settings.view != 2)
 		{
 			bool icon = false;
 			if(strncmp(vechomebrew_list_choice[i].foldername.c_str(), "sd", 2) == 0)
@@ -398,11 +439,6 @@ int MenuMain()
 			else if(strncmp(vechomebrew_list_choice[i].foldername.c_str(), "usb", 3) == 0)
 			{
 				viewdevice = new GuiImage(new GuiImageData(Theme.usb_inactive));
-				icon = true;
-			}
-			else if(strncmp(vechomebrew_list_choice[i].foldername.c_str(), "dvd", 3) == 0)
-			{
-				viewdevice = new GuiImage (new GuiImageData(Theme.dvd_inactive));
 				icon = true;
 			}
 
@@ -419,21 +455,11 @@ int MenuMain()
 		GuiText * AppsBtnTxt2 = NULL;
 		GuiText * AppsBtnTxt3 = NULL;
 
-		// Grid Ansicht
-		if(Settings.grid)
-		{
-			if(vechomebrew_list_choice[i].icon == NULL)
-			{
-				AppsBtnTxt1 = new GuiText(vechomebrew_list_choice[i].name.c_str(), 20, (GXColor){Theme.apps_1, Theme.apps_2, Theme.apps_3, 255});
-				AppsBtnTxt1->SetMaxWidth(100, SCROLL_HORIZONTAL);
-			}
-			viewicon->SetAlignment(ALIGN_CENTRE, ALIGN_MIDDLE);
-		}
 		// Normale Ansicht
-		else
+		if(Settings.view == 0)
 		{
 			AppsBtnTxt1 = new GuiText(vechomebrew_list_choice[i].name.c_str(), 20, (GXColor){Theme.apps_1, Theme.apps_2, Theme.apps_3, 255});
-			AppsBtnTxt2 = new GuiText("____________________________________________________", 24, (GXColor){Theme.apps_1, Theme.apps_2, Theme.apps_3, 100});
+			AppsBtnTxt2 = new GuiText("....................................................", 24, (GXColor){Theme.apps_1, Theme.apps_2, Theme.apps_3, 100});
 			AppsBtnTxt3 = new GuiText(tr(vechomebrew_list_choice[i].info.c_str()), 20, (GXColor){Theme.apps_1, Theme.apps_2, Theme.apps_3, 255});
 
 			viewicon->SetAlignment(ALIGN_LEFT, ALIGN_MIDDLE);
@@ -449,7 +475,29 @@ int MenuMain()
 			AppsBtnTxt3->SetMaxWidth(265, DOTTED);
 		}
 
-		AppsBtn[i] = new GuiButton(apps_btn.GetWidth(), apps_btn.GetHeight());
+		// Grid Ansicht
+		else if(Settings.view == 1)
+		{
+			if(vechomebrew_list_choice[i].icon == NULL)
+			{
+				AppsBtnTxt1 = new GuiText(vechomebrew_list_choice[i].name.c_str(), 20, (GXColor){Theme.apps_1, Theme.apps_2, Theme.apps_3, 255});
+				AppsBtnTxt1->SetMaxWidth(100, SCROLL_HORIZONTAL);
+			}
+			viewicon->SetAlignment(ALIGN_CENTRE, ALIGN_MIDDLE);
+		}
+
+		// PC Ansicht
+		else if(Settings.view == 2)
+		{
+			if(vechomebrew_list_choice[i].icon == NULL)
+			{
+				AppsBtnTxt1 = new GuiText(vechomebrew_list_choice[i].name.c_str(), 20, (GXColor){Theme.apps_1, Theme.apps_2, Theme.apps_3, 255});
+				AppsBtnTxt1->SetMaxWidth(75, SCROLL_HORIZONTAL);
+			}
+			viewicon->SetAlignment(ALIGN_CENTRE, ALIGN_MIDDLE);
+			AppsBtn[i]->SetScale(0.75);
+		}
+
 		AppsBtn[i]->SetAlignment(ALIGN_LEFT, ALIGN_TOP);
 		AppsBtn[i]->SetPosition(x, y);
 		AppsBtn[i]->SetLabel(AppsBtnTxt1, 0);
@@ -472,18 +520,33 @@ int MenuMain()
 
 		app_grid++;
 
-		// wenn zeile voll, zur nächsten gehen
-		if(app_grid == apps_row)
+		if(Settings.view == 2)
 		{
-			x = screenwidth / 2 - (apps_btn.GetWidth() * apps_row) / 2;
-			if(Options.apps == 4)
-				y += 70;
-			else if(Options.apps == 5)
-				y += 63;
-			app_grid = 0;
+			// wenn zeile voll, zur nächsten gehen
+			if(app_grid == apps_numers / apps_row)
+			{
+				y = 4;
+				x += 120;
+				app_grid = 0;
+			}
+			else
+				y += 50;
 		}
 		else
-			x += 144;
+		{
+			// wenn zeile voll, zur nächsten gehen
+			if(app_grid == apps_row)
+			{
+				x = screenwidth / 2 - (apps_btn.GetWidth() * apps_row) / 2;
+				if(Options.apps == 4)
+					y += 70;
+				else if(Options.apps == 5)
+					y += 63;
+				app_grid = 0;
+			}
+			else
+				x += 144;
+		}
 	}
 
 	if(Settings.current_page > Settings.total_page)
@@ -492,7 +555,7 @@ int MenuMain()
 	// wenn nicht seite 1
 	if(Settings.current_page != 1)
 	{
-		for(int i=0; i < (signed)vechomebrew_list_choice.size(); i++)
+		for(int i=0; i < gesamt_apps; i++)
 		{
 			AppsBtn[i]->SetVisible(false);
 			AppsBtn[i]->SetSelectable(false);
@@ -500,7 +563,7 @@ int MenuMain()
 
 		for(int i = 0; i < apps_numers; i++)
 		{
-			if((Settings.current_page-1)*apps_numers+i < (signed)vechomebrew_list_choice.size())
+			if((Settings.current_page-1)*apps_numers+i < gesamt_apps)
 			{
 				AppsBtn[(Settings.current_page-1)*apps_numers+i]->SetVisible(true);
 				AppsBtn[(Settings.current_page-1)*apps_numers+i]->SetSelectable(true);
@@ -545,6 +608,8 @@ int MenuMain()
 	newRevTxt.SetAlignment(ALIGN_CENTRE, ALIGN_TOP);
 	newRevTxt.SetPosition(0,415);
 
+	// Apps Anzeigefeld
+	GuiWindow Apps(screenwidth, screenheight);
 	if(Options.slide_effect > 0 && temp_slide)
 		Apps.SetEffect(Settings.Apps_from | EFFECT_SLIDE_IN, Options.slide_effect * 50);
 
@@ -552,28 +617,38 @@ int MenuMain()
 	temp_slide = true;
 
 	HaltGui();
-	Apps.Append(&categoryTxt);
-	for(int i=0; i < (signed)vechomebrew_list_choice.size(); i++)
+	for(int i=0; i < gesamt_apps; i++)
 		Apps.Append(AppsBtn[i]);
 	Apps.Append(AppsBtnFree);
 	Apps.Append(AppsBtnMove);
 
 	GuiWindow w(screenwidth, screenheight);
-	w.Append(&categoryBtn);
+	if(Settings.view == 1 || Settings.view == 0)
+	{
+		Apps.Append(&categoryTxt);
+		w.Append(&categoryBtn);
+		w.Append(&leftBtn);
+		w.Append(&rightBtn);
+		w.Append(&minusBtn);
+		w.Append(&plusBtn);
+		w.Append(&sd_usb_Btn);
+		w.Append(&wii_gc_Btn);
+		w.Append(&normal_grid_Btn);
+		w.Append(&settings_Btn);
+		w.Append(&power_Btn);
+		w.Append(&network_Btn);
+		w.Append(pageTxt);
+	}
+	else if(Settings.view == 2)
+	{
+		w.Append(&desktop_Img);
+		w.Append(&bar_Img);
+		w.Append(&start_Btn);
+	}
+
 	w.Append(&LogoHomebrewFilterImg);
 	w.Append(&ownerTxt);
-	w.Append(&leftBtn);
-	w.Append(&rightBtn);
-	w.Append(&minusBtn);
-	w.Append(&plusBtn);
-	w.Append(&sd_usb_Btn);
-	w.Append(&wii_gc_Btn);
-	w.Append(&normal_grid_Btn);
-	w.Append(&settings_Btn);
-	w.Append(&power_Btn);
-	w.Append(&loader_Btn);
-	w.Append(&network_Btn);
-	w.Append(pageTxt);
+
 	if(CheckRev() && Options.newrevtext)
 		w.Append(&newRevTxt);
 
@@ -586,8 +661,7 @@ int MenuMain()
 	// letzte app markieren
 	if(app_pos != -1)
 	{
-	//	mainWindow->ChangeFocus(&Apps);
-		for(int i=0; i < (signed)vechomebrew_list_choice.size(); i++)
+		for(int i=0; i < gesamt_apps; i++)
 		{
 			if(i == app_pos)
 				AppsBtn[i]->SetState(STATE_SELECTED);
@@ -661,15 +735,25 @@ int MenuMain()
 				menu = MENU_EXIT;
 
 			// ansicht wechseln
-			if(((WPAD_ButtonsDown(0) & WPAD_BUTTON_2) &! (WPAD_ButtonsDown(0) & WPAD_BUTTON_1)) || normal_grid_Btn.GetState() == STATE_CLICKED)
+			if(normal_grid_Btn.GetState() == STATE_CLICKED)
 			{
-				Settings.current_page = 1;
-				if(Settings.grid)
-					Settings.grid = false;
-				else
-					Settings.grid = true;
+				int choice = viewPrompt();
 
-				menu = MENU_MAIN;
+				if(choice == 0)
+					Settings.view = 0;
+				else if(choice == 1)
+					Settings.view = 1;
+				else if(choice == 2)
+					Settings.view = 2;
+
+				if(choice != -1)
+				{
+				//	check_device();
+					Settings.current_page = 1;
+					menu = MENU_MAIN;
+				}
+				else
+					normal_grid_Btn.ResetState();
 			}
 
 			// wenn A gedrückt
@@ -687,9 +771,7 @@ int MenuMain()
 			}
 
 			// SD, USB
-			else if(sd_usb_Btn.GetState() == STATE_CLICKED 	|| Settings.sd_insert == -1 || Settings.sd_insert == 2
-									|| Settings.usb_insert == -1 || Settings.usb_insert == 2
-									|| Settings.dvd_insert == -1 || Settings.dvd_insert == 2)
+			else if(sd_usb_Btn.GetState() == STATE_CLICKED || Settings.sd_insert == -1 || Settings.sd_insert == 2 || Settings.usb_insert == -1 || Settings.usb_insert == 2)
 			{
 				int device = -1;
 				if(sd_usb_Btn.GetState() == STATE_CLICKED)
@@ -701,14 +783,8 @@ int MenuMain()
 					Settings.device = "usb1";
 				else if(device == 3)
 					Settings.device = "sd_usb";
-				else if(device == 4)
-					Settings.device = "dvd";
-				else if(device == 5)
-					Settings.device = "all";
 
-				if(device != -1 || Settings.sd_insert == -1 || Settings.sd_insert == 2
-						|| Settings.usb_insert == -1 || Settings.usb_insert == 2
-						|| Settings.dvd_insert == -1 || Settings.dvd_insert == 2)
+				if(device != -1 || Settings.sd_insert == -1 || Settings.sd_insert == 2 || Settings.usb_insert == -1 || Settings.usb_insert == 2)
 				{
 					check_device();
 					Settings.current_page = 1;
@@ -748,14 +824,6 @@ int MenuMain()
 					menu = MENU_EXIT;
 			}
 
-			// Loader button
-			else if(loader_Btn.GetState() ==  STATE_CLICKED || WPAD_ButtonsDown(0) & (WPAD_BUTTON_HOME | WPAD_CLASSIC_BUTTON_HOME) || PAD_ButtonsDown(0) & PAD_BUTTON_START)
-			{
-				loader_Btn.ResetState();
-				if(loaderPrompt() == MENU_EXIT)
-					menu = MENU_EXIT;
-			}
-
 			// Netzwerk button
 			else if(network_Btn.GetState() == STATE_CLICKED)
 			{
@@ -763,206 +831,218 @@ int MenuMain()
 				ResumeNetworkThread();
 			}
 
-			// eine Seite weiter bzw zurück
-			else if((WPAD_ButtonsDown(0) & (WPAD_BUTTON_RIGHT | WPAD_CLASSIC_BUTTON_RIGHT) && !Options.navigation) ||
-					(WPAD_ButtonsDown(0) & (WPAD_BUTTON_PLUS | WPAD_CLASSIC_BUTTON_PLUS) && Options.navigation) ||
-					PAD_ButtonsDown(0) & PAD_BUTTON_RIGHT || rightBtn.GetState() == STATE_CLICKED ||
-					(WPAD_ButtonsDown(0) & (WPAD_BUTTON_LEFT | WPAD_CLASSIC_BUTTON_LEFT) && !Options.navigation) ||
-					(WPAD_ButtonsDown(0) & (WPAD_BUTTON_MINUS | WPAD_CLASSIC_BUTTON_MINUS) && Options.navigation) ||
-					PAD_ButtonsDown(0) & PAD_BUTTON_LEFT || leftBtn.GetState() == STATE_CLICKED)
+			if(Settings.view != 2)
 			{
-				// Abbrechen Seite zurück
+				// eine Seite weiter bzw zurück
 				if((WPAD_ButtonsDown(0) & (WPAD_BUTTON_RIGHT | WPAD_CLASSIC_BUTTON_RIGHT) && !Options.navigation) ||
-					(WPAD_ButtonsDown(0) & (WPAD_BUTTON_PLUS | WPAD_CLASSIC_BUTTON_PLUS) && Options.navigation) ||
-					PAD_ButtonsDown(0) & PAD_BUTTON_RIGHT || rightBtn.GetState() == STATE_CLICKED)
-					previous_page = false;
-
-				// Abbrechen Seite weiter
-				if((WPAD_ButtonsDown(0) & (WPAD_BUTTON_LEFT | WPAD_CLASSIC_BUTTON_LEFT) && !Options.navigation) ||
-					(WPAD_ButtonsDown(0) & (WPAD_BUTTON_MINUS | WPAD_CLASSIC_BUTTON_MINUS) && Options.navigation) ||
-					PAD_ButtonsDown(0) & PAD_BUTTON_LEFT || leftBtn.GetState() == STATE_CLICKED)
-					next_page = false;
-
-				int page = Settings.current_page;
-				bool change = false;
-				if(next_page || rightBtn.GetState() == STATE_CLICKED || (WPAD_ButtonsDown(0) & (WPAD_BUTTON_PLUS | WPAD_CLASSIC_BUTTON_PLUS) && Options.navigation))
+						(WPAD_ButtonsDown(0) & (WPAD_BUTTON_PLUS | WPAD_CLASSIC_BUTTON_PLUS) && Options.navigation) ||
+						PAD_ButtonsDown(0) & PAD_BUTTON_RIGHT || rightBtn.GetState() == STATE_CLICKED ||
+						(WPAD_ButtonsDown(0) & (WPAD_BUTTON_LEFT | WPAD_CLASSIC_BUTTON_LEFT) && !Options.navigation) ||
+						(WPAD_ButtonsDown(0) & (WPAD_BUTTON_MINUS | WPAD_CLASSIC_BUTTON_MINUS) && Options.navigation) ||
+						PAD_ButtonsDown(0) & PAD_BUTTON_LEFT || leftBtn.GetState() == STATE_CLICKED)
 				{
-					rightBtn.ResetState();
-					Settings.current_page++;
-					if(Settings.current_page > Settings.total_page)
-						Settings.current_page = 1;
+					// Abbrechen Seite zurück
+					if((WPAD_ButtonsDown(0) & (WPAD_BUTTON_RIGHT | WPAD_CLASSIC_BUTTON_RIGHT) && !Options.navigation) ||
+						(WPAD_ButtonsDown(0) & (WPAD_BUTTON_PLUS | WPAD_CLASSIC_BUTTON_PLUS) && Options.navigation) ||
+						PAD_ButtonsDown(0) & PAD_BUTTON_RIGHT || rightBtn.GetState() == STATE_CLICKED)
+						previous_page = false;
 
-					Settings.Apps_from = EFFECT_SLIDE_RIGHT;
-					Settings.Apps_to = EFFECT_SLIDE_LEFT;
+					// Abbrechen Seite weiter
+					if((WPAD_ButtonsDown(0) & (WPAD_BUTTON_LEFT | WPAD_CLASSIC_BUTTON_LEFT) && !Options.navigation) ||
+						(WPAD_ButtonsDown(0) & (WPAD_BUTTON_MINUS | WPAD_CLASSIC_BUTTON_MINUS) && Options.navigation) ||
+						PAD_ButtonsDown(0) & PAD_BUTTON_LEFT || leftBtn.GetState() == STATE_CLICKED)
+						next_page = false;
 
-					next_page = false;
-
-					if(Settings.total_page != 1)
-						change = true;
-				}
-
-				if(previous_page || leftBtn.GetState() == STATE_CLICKED || (WPAD_ButtonsDown(0) & (WPAD_BUTTON_MINUS | WPAD_CLASSIC_BUTTON_MINUS) && Options.navigation))
-				{
-					leftBtn.ResetState();
-					Settings.current_page--;
-					if(Settings.current_page == 0)
-						Settings.current_page = Settings.total_page;
-
-					Settings.Apps_from = EFFECT_SLIDE_LEFT;
-					Settings.Apps_to = EFFECT_SLIDE_RIGHT;
-
-					previous_page = false;
-					if(Settings.total_page != 1)
-						change = true;
-				}
-
-				if(change)
-				{
-					HaltResumeGui(); // -> um nur eine Seite zu blättern
-
-					// alten apps ausblenden
-					if(Options.slide_effect > 0 && Settings.Apps_to != 0)
+					int page = Settings.current_page;
+					bool change = false;
+					if(next_page || rightBtn.GetState() == STATE_CLICKED || (WPAD_ButtonsDown(0) & (WPAD_BUTTON_PLUS | WPAD_CLASSIC_BUTTON_PLUS) && Options.navigation))
 					{
-						Apps.SetEffect(Settings.Apps_to | EFFECT_SLIDE_OUT, Options.slide_effect * 50);
-						while(Apps.GetEffect() > 0)
-							usleep(100);
+						rightBtn.ResetState();
+						Settings.current_page++;
+						if(Settings.current_page > Settings.total_page)
+							Settings.current_page = 1;
+
+						Settings.Apps_from = EFFECT_SLIDE_RIGHT;
+						Settings.Apps_to = EFFECT_SLIDE_LEFT;
+
+						next_page = false;
+
+						if(Settings.total_page != 1)
+							change = true;
 					}
 
-					for(int i = 0; i < apps_numers; i++)
+					if(previous_page || leftBtn.GetState() == STATE_CLICKED || (WPAD_ButtonsDown(0) & (WPAD_BUTTON_MINUS | WPAD_CLASSIC_BUTTON_MINUS) && Options.navigation))
 					{
-						// vorherige seite ausblenden
-						if((page-1)*apps_numers+i < (signed)vechomebrew_list_choice.size())
-						{
-							AppsBtn[(page-1)*apps_numers+i]->SetVisible(false);
-							AppsBtn[(page-1)*apps_numers+i]->SetSelectable(false);
-							AppsBtn[(page-1)*apps_numers+i]->ResetState();
-						}
-						// aktuelle seite einblenden
-						if((Settings.current_page-1)*apps_numers+i < (signed)vechomebrew_list_choice.size())
-						{
-							AppsBtn[(Settings.current_page-1)*apps_numers+i]->SetVisible(true);
-							AppsBtn[(Settings.current_page-1)*apps_numers+i]->SetSelectable(true);
-							AppsBtn[(Settings.current_page-1)*apps_numers+i]->ResetState();
-						}
-						// zu verschiebene app ausblenden und leeres feld einblenden
-						if(grab && (Settings.current_page-1)*apps_numers+i == move.nr)
-						{
-							AppsBtn[move.nr]->SetVisible(false);
-							AppsBtn[move.nr]->SetSelectable(false);
-						}
+						leftBtn.ResetState();
+						Settings.current_page--;
+						if(Settings.current_page == 0)
+							Settings.current_page = Settings.total_page;
+
+						Settings.Apps_from = EFFECT_SLIDE_LEFT;
+						Settings.Apps_to = EFFECT_SLIDE_RIGHT;
+
+						previous_page = false;
+						if(Settings.total_page != 1)
+							change = true;
 					}
 
-					// felder in ursprungsposition setzen
-					for(int i=0; i < (signed)vechomebrew_list_choice.size(); i++)
-						AppsBtn[i]->SetPosition(pos_x[i], pos_y[i]);
+					if(change)
+					{
+						HaltResumeGui(); // -> um nur eine Seite zu blättern
 
-					// beim seitenwechsel, leeres feld positionieren
-					if(Settings.current_page == move.page)
-						AppsBtnFree->SetPosition(pos_x[move.nr], pos_y[move.nr]);
-					else
-						AppsBtnFree->SetPosition(-1000, -1000);
+						// alten apps ausblenden
+						if(Options.slide_effect > 0 && Settings.Apps_to != 0)
+						{
+							Apps.SetEffect(Settings.Apps_to | EFFECT_SLIDE_OUT, Options.slide_effect * 50);
+							while(Apps.GetEffect() > 0)
+								usleep(100);
+						}
 
-					// app 1 auf der aktuellen seite markieren, außer beim verschieben
-					if(!grab)
-						AppsBtn[(Settings.current_page-1)*apps_numers]->SetState(STATE_SELECTED);
+						for(int i = 0; i < apps_numers; i++)
+						{
+							// vorherige seite ausblenden
+							if((page-1)*apps_numers+i < gesamt_apps)
+							{
+								AppsBtn[(page-1)*apps_numers+i]->SetVisible(false);
+								AppsBtn[(page-1)*apps_numers+i]->SetSelectable(false);
+								AppsBtn[(page-1)*apps_numers+i]->ResetState();
+							}
+							// aktuelle seite einblenden
+							if((Settings.current_page-1)*apps_numers+i < gesamt_apps)
+							{
+								AppsBtn[(Settings.current_page-1)*apps_numers+i]->SetVisible(true);
+								AppsBtn[(Settings.current_page-1)*apps_numers+i]->SetSelectable(true);
+								AppsBtn[(Settings.current_page-1)*apps_numers+i]->ResetState();
+							}
+							// zu verschiebene app ausblenden und leeres feld einblenden
+							if(grab && (Settings.current_page-1)*apps_numers+i == move.nr)
+							{
+								AppsBtn[move.nr]->SetVisible(false);
+								AppsBtn[move.nr]->SetSelectable(false);
+							}
+						}
 
-					// neue apps einblenden
-					if(Options.slide_effect > 0)
-						Apps.SetEffect(Settings.Apps_from | EFFECT_SLIDE_IN, Options.slide_effect * 50);
+						// felder in ursprungsposition setzen
+						for(int i=0; i < gesamt_apps; i++)
+							AppsBtn[i]->SetPosition(pos_x[i], pos_y[i]);
 
-					char buffer[100];
-					sprintf(buffer, tr("Page %i of %i"), Settings.current_page, Settings.total_page);
-					pageTxt->SetText(buffer);
+						// beim seitenwechsel, leeres feld positionieren
+						if(Settings.current_page == move.page)
+							AppsBtnFree->SetPosition(pos_x[move.nr], pos_y[move.nr]);
+						else
+							AppsBtnFree->SetPosition(-1000, -1000);
+
+						// app 1 auf der aktuellen seite markieren, außer beim verschieben
+						if(!grab)
+							AppsBtn[(Settings.current_page-1)*apps_numers]->SetState(STATE_SELECTED);
+
+						// neue apps einblenden
+						if(Options.slide_effect > 0)
+							Apps.SetEffect(Settings.Apps_from | EFFECT_SLIDE_IN, Options.slide_effect * 50);
+
+						char buffer[100];
+						sprintf(buffer, tr("Page %i of %i"), Settings.current_page, Settings.total_page);
+						pageTxt->SetText(buffer);
+					}
+
+
+	/*					// eine Seite weiter
+					if((WPAD_ButtonsDown(0) & (WPAD_BUTTON_RIGHT | WPAD_CLASSIC_BUTTON_RIGHT) && !Options.navigation) ||
+						(WPAD_ButtonsDown(0) & (WPAD_BUTTON_PLUS | WPAD_CLASSIC_BUTTON_PLUS) && Options.navigation) ||
+						PAD_ButtonsDown(0) & PAD_BUTTON_RIGHT || rightBtn.GetState() == STATE_CLICKED)
+					{
+					for(int i = 1; i < apps_numers/apps_row +1; i++)
+						{
+							if(Apps.GetSelected() == i * apps_row -1 + (Settings.current_page -1) * apps_numers || Apps.GetSelected() == gesamt_apps -1)
+							{
+								next_page = true;
+								break;
+							}
+						}
+					}
+	*/			}
+				// eine Kategorie weiter
+				else if((WPAD_ButtonsDown(0) & (WPAD_BUTTON_PLUS | WPAD_CLASSIC_BUTTON_PLUS) && !Options.navigation) ||
+						(WPAD_ButtonsDown(0) & (WPAD_BUTTON_RIGHT | WPAD_CLASSIC_BUTTON_RIGHT) && Options.navigation) ||
+						PAD_ButtonsDown(0) & PAD_TRIGGER_R || plusBtn.GetState() == STATE_CLICKED)
+				{
+					Next_Category();
+					menu = MENU_MAIN;
+				}
+
+				// eine Kategorie zurück
+				else if((WPAD_ButtonsDown(0) & (WPAD_BUTTON_MINUS | WPAD_CLASSIC_BUTTON_MINUS) && !Options.navigation) ||
+						(WPAD_ButtonsDown(0) & (WPAD_BUTTON_LEFT | WPAD_CLASSIC_BUTTON_LEFT) && Options.navigation) ||
+						PAD_ButtonsDown(0) & PAD_TRIGGER_L || minusBtn.GetState() == STATE_CLICKED)
+				{
+					Previous_Category();
+					menu = MENU_MAIN;
+				}
+
+				// Kategorie umbenennen / verschieben
+				else if(categoryBtn.GetState() == STATE_CLICKED)
+				{
+					categoryBtn.ResetState();
+					Category_rename_move(button);
+					temp_slide = false;
+					menu = MENU_MAIN;
+				}
+
+				for(int i = 1; i < apps_numers/apps_row +1; i++)
+				{
+					if(Apps.GetSelected() == (i -1) * apps_row + (Settings.current_page -1) * apps_numers)
+						previous_page = true;
+
+					if(Apps.GetSelected() == i * apps_row -1 + (Settings.current_page -1) * apps_numers || Apps.GetSelected() == gesamt_apps -1)
+						next_page = true;
 				}
 			}
-
-			// eine Kategorie weiter
-			else if((WPAD_ButtonsDown(0) & (WPAD_BUTTON_PLUS | WPAD_CLASSIC_BUTTON_PLUS) && !Options.navigation) ||
-					(WPAD_ButtonsDown(0) & (WPAD_BUTTON_RIGHT | WPAD_CLASSIC_BUTTON_RIGHT) && Options.navigation) ||
-					PAD_ButtonsDown(0) & PAD_TRIGGER_R || plusBtn.GetState() == STATE_CLICKED)
+			else
 			{
-				Next_Category();
-				menu = MENU_MAIN;
-			}
+				if(start_Btn.GetState() == STATE_CLICKED)
+				{
+					start_Btn.ResetState();
+				//	int CategoryNr, AppNr;
+				//	int choice = startmenuPrompt(CategoryNr, AppNr);
+					int choice = startmenu2Prompt();
 
-			// eine Kategorie zurück
-			else if((WPAD_ButtonsDown(0) & (WPAD_BUTTON_MINUS | WPAD_CLASSIC_BUTTON_MINUS) && !Options.navigation) ||
-					(WPAD_ButtonsDown(0) & (WPAD_BUTTON_LEFT | WPAD_CLASSIC_BUTTON_LEFT) && Options.navigation) ||
-					PAD_ButtonsDown(0) & PAD_TRIGGER_L || minusBtn.GetState() == STATE_CLICKED)
-			{
-				Previous_Category();
-				menu = MENU_MAIN;
-			}
+						char buffer[20];
+						sprintf(buffer, "%i", choice);
+						debug(buffer);
 
-			// Kategorie umbenennen / verschieben
-			else if(categoryBtn.GetState() == STATE_CLICKED)
-			{
-				categoryBtn.ResetState();
-				Category_rename_move(button);
-				temp_slide = false;
-				menu = MENU_MAIN;
-			}
+					if(choice == -1)
+						normal_grid_Btn.SetState(STATE_CLICKED);
+					else if(choice == -2)
+						settings_Btn.SetState(STATE_CLICKED);
+					else if(choice == -3)
+						power_Btn.SetState(STATE_CLICKED);
+					else if(choice == 1)
+					{
+				//		char buffer[20];
+				//		sprintf(buffer, "%i %i", CategoryNr, AppNr);
+				//		debug(buffer);
 
-			// für die grid ansicht, navigation der einzelnen zellen
-			previous_page = false;
-			next_page = false;
-			for(int i = 0; i< apps_numers/apps_row; i++)
-			{
-				if(Apps.GetSelected() == i * apps_row + 1 + (Settings.current_page -1) * apps_numers)
-					previous_page = true;
-
-				if(Apps.GetSelected() == (i+1) * apps_row + (Settings.current_page -1) * apps_numers || Apps.GetSelected() == (signed)vechomebrew_list_choice.size())
-					next_page = true;
+				//		menu = ChoiceAppInfo(vechomebrew_list_category[CategoryNr], AppNr);
+						temp_slide = false;
+					}
+		//			normal_grid_Btn.SetState(STATE_CLICKED);
+				}
 			}
 
 			// list apps
-			for(int i = (Settings.current_page-1)*apps_numers; i < Settings.current_page*apps_numers && i < (signed)vechomebrew_list_choice.size(); i++)
+			for(int i = (Settings.current_page-1)*apps_numers; i < Settings.current_page*apps_numers && i < gesamt_apps; i++)
 			{
 				// show apps info
 				if(AppsBtn[i]->GetState() == STATE_CLICKED && button == "A")
 				{
+				debug("test");
 					AppsBtn[i]->SetState(STATE_SELECTED);
-					again:
 
-					int choice;
-					if(Options.quick_start == 0)
-						choice = AppInfo(vechomebrew_list_choice[i].name.c_str(), vechomebrew_list_choice[i].foldername, vechomebrew_list_choice[i].icon);
-					else
-						choice = 1;
-
-					if(choice == 1)				// App starten
-					{
-						Settings.forwarder_path = vechomebrew_list_choice[i].pathboot;
-						Settings.forwarder_arg = vechomebrew_list_choice[i].arg.c_str();
-						boothomebrew = true;
-						menu = MENU_EXIT;
-					}
-					if(choice == 2)				// App Einfügen
-					{
-						string app_in_kategorie = AddApp(vechomebrew_list_choice[i].name.c_str());
-						if( app_in_kategorie != "NULL" )
-						{
-							AppEinfuegen(app_in_kategorie, vechomebrew_list_choice[i].foldername.c_str());
-							copy_app_in_unassigned();
-							temp_slide = false;
-							menu = MENU_MAIN;
-						}
-					}
-					if(choice == 3 || choice == 4)
-					{
-						AppEraseDelate(choice, vechomebrew_list_choice[i].name.c_str(), vechomebrew_list_choice[i].foldername.c_str());
-						temp_slide = false;
-						menu = MENU_MAIN;
-					}
-					if(choice == 5)
-					{
-						MetaEdit(vechomebrew_list_choice[i].foldername);
-						temp_slide = false;
-						goto again;
-					}
+					menu = ChoiceAppInfo(vechomebrew_list_choice, i);
+					temp_slide = false;
 
 					mainWindow->ChangeFocus(&Apps);
-					for(int x=0; x < (signed)vechomebrew_list_choice.size(); x++)
+					for(int x=0; x < gesamt_apps; x++)
 					{
 						if(x == i)
 							AppsBtn[x]->SetState(STATE_SELECTED);
@@ -987,7 +1067,7 @@ int MenuMain()
 						ViewIconMove = new GuiImage(icon_dataMove);
 
 						// Grid Ansicht
-						if(Settings.grid)
+						if(Settings.view == 1)
 						{
 							AppsBtnTxtMove1->SetText("");
 							if(vechomebrew_list_choice[i].icon == NULL)
@@ -1061,7 +1141,7 @@ int MenuMain()
 					}
 					AppsBtnFree->SetPosition(pos_x[i], pos_y[i]);
 
-					for(i = 0; i < apps_numers && (Settings.current_page-1)*apps_numers+i  < (signed)vechomebrew_list_choice.size(); i++)
+					for(i = 0; i < apps_numers && (Settings.current_page-1)*apps_numers+i  < gesamt_apps; i++)
 					{
 						int x = (Settings.current_page-1)*apps_numers+i;
 						// buttons 1 kleiner button 2
@@ -1137,7 +1217,7 @@ int MenuMain()
 					else
 					{
 						// felder in ursprungsposition setzen
-						for(int i=0; i < (signed)vechomebrew_list_choice.size(); i++)
+						for(int i=0; i < gesamt_apps; i++)
 							AppsBtn[i]->SetPosition(pos_x[i], pos_y[i]);
 						if(Settings.current_page == move.page)
 							AppsBtn[move.nr]->SetVisible(true);

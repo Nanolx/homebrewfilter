@@ -86,11 +86,11 @@ void fontDownload(string fontname)
 
 	char buffer[100];
 	msgTxt.SetText(fontname.c_str());
-	sprintf(buffer, "http://www.nanolx.org/hbf/Fonts/%s", fontname.c_str());	
+	sprintf(buffer, "http://hbf.hamachi-mp.bplaced.net/Fonts/%s", fontname.c_str());	
 	struct block file = downloadfile(buffer);
 	if (file.data && file.size > 0 && folder_exists())
 	{
-		FILE * data = fopen((Settings.device_dat + ":/config/HBF/Fonts/"+ fontname).c_str(), "wb");
+		FILE * data = fopen((Settings.device_dat + ":/config/Homebrew Filter/Fonts/"+ fontname).c_str(), "wb");
 		if(data)
 		{
 			fwrite(file.data, 1, file.size, data);
@@ -126,7 +126,7 @@ string FontList()
 	bool stop = false;
 	
 	char buffer[100];
-	sprintf(buffer, "http://www.nanolx.org/hbf/Fonts/");	
+	sprintf(buffer, "http://hbf.hamachi-mp.bplaced.net/Fonts/");	
 
 	struct block file = downloadfile(buffer);
 	if (file.data != NULL)

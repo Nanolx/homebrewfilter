@@ -14,10 +14,8 @@
 #include "Network/update.h"
 #include "Network/http.h"
 
-#include <fstream>
-#include <ios>
 
-/*** Extern variables ***/
+#/*** Extern variables ***/
 extern GuiWindow * mainWindow;
 extern bool boot_buffer;
 
@@ -101,33 +99,15 @@ updatePrompt(string rev)
 	ResumeGui();
 
 	char url[100];
-	if(rev == "Beta")
-		sprintf(url, "http://download.tuxfamily.org/hbf/DOL/Beta/boot.dol");
-	else
-		sprintf(url, "http://download.tuxfamily.org/hbf/DOL/rev%s/boot.dol", rev.c_str());
-
-	// copy boot.dol to prev.dol
-	std::ifstream infile((Settings.device_dat + ":/apps/HomebrewFilter/boot.dol").c_str(), std::ios_base::binary);
-	std::ofstream outfile((Settings.device_dat + ":/apps/HomebrewFilter/prev.dol").c_str(), std::ios_base::binary);
-
-	outfile << infile.rdbuf();
+	sprintf(url, "http://hamachi-mp.bplaced.net/Downloads/wii/Homebrew_Filter/rev%s/boot.dol", rev.c_str());
 
 	struct block file = downloadfile(url);
 	if (file.data && file.size > 0)
 	{
-		// write file
-		FILE * data = fopen((Settings.device_dat + ":/apps/HomebrewFilter/boot.dol").c_str(), "wb");
-		if(data)
-		{
-			fwrite(file.data, 1, file.size, data);
-			fclose(data);
-		}
-
+		CopyHomebrewMemory(file.data, 0, file.size);
 		if(file.data)
 			free(file.data);
-
-		LoadHomebrew ((Settings.device_dat + ":/apps/HomebrewFilter/boot.dol").c_str());
-		BootHomebrew ();
+		boot_buffer = true;
 	}
 	else
 	{

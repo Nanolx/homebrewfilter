@@ -38,12 +38,6 @@ extern const u32	button_square_png_size;
 extern const u8		button_square_focus_png[];
 extern const u32	button_square_focus_png_size;
 
-extern const u8		button_large_png[];
-extern const u32	button_large_png_size;
-
-extern const u8		button_large_over_png[];
-extern const u32	button_large_over_png_size;
-
 extern const u8		dialog_background_png[];
 extern const u32	dialog_background_png_size;
 
@@ -170,9 +164,6 @@ extern const u32	throbber_png_size;
 extern const u8		choice_png[];
 extern const u32	choice_png_size;
 
-extern const u8		choice_large_png[];
-extern const u32	choice_large_png_size;
-
 extern const u8		sd_active_png[];
 extern const u32	sd_active_png_size;
 
@@ -191,24 +182,6 @@ extern const u32	sd_usb_active_png_size;
 extern const u8		sd_usb_inactive_png[];
 extern const u32	sd_usb_inactive_png_size;
 
-extern const u8		dvd_active_png[];
-extern const u32	dvd_active_png_size;
-
-extern const u8		all_active_png[];
-extern const u32	all_active_png_size;
-
-extern const u8		dvd_inactive_png[];
-extern const u32	dvd_inactive_png_size;
-
-extern const u8		all_inactive_png[];
-extern const u32	all_inactive_png_size;
-
-extern const u8		loader_active_png[];
-extern const u32	loader_active_png_size;
-
-extern const u8		loader_inactive_png[];
-extern const u32	loader_inactive_png_size;
-
 extern const u8		wii_active_png[];
 extern const u32	wii_active_png_size;
 
@@ -220,6 +193,12 @@ extern const u32	gc_active_png_size;
 
 extern const u8		gc_inactive_png[];
 extern const u32	gc_inactive_png_size;
+
+extern const u8		pc_active_png[];
+extern const u32	pc_active_png_size;
+
+extern const u8		pc_inactive_png[];
+extern const u32	pc_inactive_png_size;
 
 extern const u8		wii_gc_active_png[];
 extern const u32	wii_gc_active_png_size;
@@ -269,11 +248,29 @@ extern const u32	edit_active_png_size;
 extern const u8		edit_inactive_png[];
 extern const u32	edit_inactive_png_size;
 
+extern const u8		hbc_icon_png[];
+extern const u32	hbc_icon_png_size;
+
 extern const u8		recycle_bin_png[];
 extern const u32	recycle_bin_png_size;
 
 extern const u8		progress_png[];
 extern const u32	progress_png_size;
+
+extern const u8		bar_png[];
+extern const u32	bar_png_size;
+
+extern const u8		desktop_png[];
+extern const u32	desktop_png_size;
+
+extern const u8		startmenu_png[];
+extern const u32	startmenu_png_size;
+
+extern const u8		startmenu_top_png[];
+extern const u32	startmenu_top_png_size;
+
+extern const u8		menu_selection_png[];
+extern const u32	menu_selection_png_size;
 
 extern const u8		LogoHomebrewFilter_png[];
 extern const u32	LogoHomebrewFilter_png_size;

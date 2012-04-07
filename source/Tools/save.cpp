@@ -24,7 +24,7 @@ bool folder_exists()
 
 		if(pDir != NULL)
 		{
-			pDir = opendir(check_path(Settings.device_dat + ":/config/HBF").c_str());
+			pDir = opendir(check_path(Settings.device_dat + ":/config/Homebrew Filter").c_str());
 			if(pDir != NULL)
 			{
 				closedir (pDir);
@@ -32,7 +32,7 @@ bool folder_exists()
 			}
 			else
 			{
-				if (mkdir((Settings.device_dat + ":/config/HBF").c_str(), 0777) != -1)
+				if (mkdir((Settings.device_dat + ":/config/Homebrew Filter").c_str(), 0777) != -1)
 					return true;		
 			}
 		}
@@ -40,7 +40,7 @@ bool folder_exists()
 		{
 			if (mkdir((Settings.device_dat + ":/config").c_str(), 0777) != -1)
 			{
-				if (mkdir((Settings.device_dat + ":/config/HBF").c_str(), 0777) != -1)
+				if (mkdir((Settings.device_dat + ":/config/Homebrew Filter").c_str(), 0777) != -1)
 					return true;
 			}
 		}
@@ -100,12 +100,12 @@ void save()
 		save_settings << "last_app_name = \""		<< Settings.startingAppName	<< "\"" << endl;
 		save_settings << "apps_nr = \""				<< Options.apps				<< "\"" << endl;
 		save_settings << "quick_start = \""			<< Options.quick_start		<< "\"" << endl;
-		save_settings << "show_all = \""			<< Options.show_all		<< "\"" << endl;
+		save_settings << "show_all = \""			<< Options.show_all			<< "\"" << endl;
 		save_settings << "navigation = \""			<< Options.navigation		<< "\"" << endl;
 		save_settings << "network = \""				<< Options.network			<< "\"" << endl;
 		save_settings << "newrevtext = \""			<< Options.newrevtext		<< "\"" << endl;
 		save_settings << "code = \""				<< Settings.code			<< "\"" << endl;
-		save_settings << "grid = \""				<< Settings.grid			<< "\"" << endl;
+		save_settings << "grid = \""				<< Settings.view			<< "\"" << endl;
 		save_settings << "device = \""				<< Settings.device			<< "\"" << endl;
 		save_settings << "device_dat = \""			<< Settings.device_dat		<< "\"" << endl;
 		save_settings << "device_icon = \""			<< Options.device_icon		<< "\"" << endl;

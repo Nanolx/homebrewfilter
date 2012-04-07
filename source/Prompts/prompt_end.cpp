@@ -43,7 +43,7 @@ endPrompt()
 	GuiImage bootmiiImg(&btn);
 	GuiImage shutdownImg(&btn);
 	GuiImage backImg(&btn);
-
+	
 	// Buttons over data
 	GuiImageData btn_over(Theme.button_focus);
 	GuiImage bootmiiImgOver(&btn_over);
@@ -59,7 +59,7 @@ endPrompt()
 	bootmii.SetImage(&bootmiiImg);
 	bootmii.SetImageOver(&bootmiiImgOver);
 	bootmii.SetTrigger(&trigA);
-
+	
 	GuiText systemmenuTxt(tr("Exit to System Menu"), 22, (GXColor){Theme.button_small_text_1, Theme.button_small_text_2, Theme.button_small_text_3, 255});
 	GuiButton systemmenu(btn.GetWidth(), btn.GetHeight());
 	systemmenu.SetAlignment(ALIGN_CENTRE, ALIGN_TOP);
@@ -70,7 +70,7 @@ endPrompt()
 	systemmenu.SetImage(&systemmenuImg);
 	systemmenu.SetImageOver(&systemmenuImgOver);
 	systemmenu.SetTrigger(&trigA);
-
+	
 	GuiText shutdownTxt(tr("Shutdown"), 22, (GXColor){Theme.button_small_text_1, Theme.button_small_text_2, Theme.button_small_text_3, 255});
 	GuiButton shutdown(btn.GetWidth(), btn.GetHeight());
 	shutdown.SetAlignment(ALIGN_CENTRE, ALIGN_TOP);
@@ -81,7 +81,7 @@ endPrompt()
 	shutdown.SetImage(&shutdownImg);
 	shutdown.SetImageOver(&shutdownImgOver);
 	shutdown.SetTrigger(&trigA);
-
+	
 	GuiText backTxt(tr("Back"), 22, (GXColor){Theme.button_small_text_1, Theme.button_small_text_2, Theme.button_small_text_3, 255});
 	GuiButton back(btn.GetWidth(), btn.GetHeight());
 	back.SetAlignment(ALIGN_CENTRE, ALIGN_TOP);
@@ -121,21 +121,21 @@ endPrompt()
 			menu = MENU_EXIT;
 			stop = true;
 		}
-
+		
 		if(systemmenu.GetState() == STATE_CLICKED)
 		{
 			PowerOff = SYS_RETURNTOMENU;
 			menu = MENU_EXIT;
 			stop = true;
 		}
-
+			
 		if(shutdown.GetState() == STATE_CLICKED)
 		{
 			PowerOff = SYS_POWEROFF_STANDBY;
 			menu = MENU_EXIT;
 			stop = true;
 		}
-
+			
 		if(back.GetState() == STATE_CLICKED || back2.GetState() == STATE_CLICKED)
 			stop = true;
 	}

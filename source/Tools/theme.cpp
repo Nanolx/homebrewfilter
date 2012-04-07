@@ -37,25 +37,20 @@ DefaultTheme()
 	Theme.dialog_background			= dialog_background_png;
 	Theme.throbber					= throbber_png;
 	Theme.choice					= choice_png;
-	Theme.choice_large				= choice_large_png;
 	Theme.sd_active					= sd_active_png;
 	Theme.sd_inactive				= sd_inactive_png;
 	Theme.usb_active				= usb_active_png;
 	Theme.usb_inactive				= usb_inactive_png;
 	Theme.sd_usb_active				= sd_usb_active_png;
-	Theme.sd_usb_inactive				= sd_usb_inactive_png;
-	Theme.dvd_active				= dvd_active_png;
-	Theme.dvd_inactive				= dvd_inactive_png;
-	Theme.all_active				= all_active_png;
-	Theme.all_inactive				= all_inactive_png;
+	Theme.sd_usb_inactive			= sd_usb_inactive_png;
 	Theme.wii_active				= wii_active_png;
 	Theme.wii_inactive				= wii_inactive_png;
 	Theme.gc_active					= gc_active_png;
 	Theme.gc_inactive				= gc_inactive_png;
+	Theme.pc_active					= pc_active_png;
+	Theme.pc_inactive				= pc_inactive_png;
 	Theme.wii_gc_active				= wii_gc_active_png;
 	Theme.wii_gc_inactive			= wii_gc_inactive_png;
-	Theme.loader_active				= loader_active_png;
-	Theme.loader_inactive				= loader_inactive_png;
 	Theme.power_active				= power_active_png;
 	Theme.power_inactive			= power_inactive_png;
 	Theme.settings_active			= settings_active_png;
@@ -76,12 +71,17 @@ DefaultTheme()
 	Theme.player_grab				= player_grab_png;
 	Theme.bg_options				= bg_options_png;
 	Theme.bg_options_entry			= bg_options_entry_png;
+	Theme.bar						= bar_png;
+	Theme.desktop					= desktop_png;
+	Theme.startmenu					= startmenu_png;
+	Theme.startmenu_top				= startmenu_top_png;
+	Theme.menu_selection			= menu_selection_png;
 	Theme.scrollbar					= scrollbar_png;
 	Theme.scrollbar_arrowdown		= scrollbar_arrowdown_png;
 	Theme.scrollbar_arrowdown_over	= scrollbar_arrowdown_over_png;
 	Theme.scrollbar_arrowup			= scrollbar_arrowup_png;
 	Theme.scrollbar_arrowup_over	= scrollbar_arrowup_over_png;
-
+	
 	// color
 	Theme.category_1				= 0;
 	Theme.category_2				= 0;
@@ -118,7 +118,7 @@ DefaultTheme()
 const u8* load_data(const u8* image, string path)
 {
 	u8 *tempicon;
-
+	
 	size_t amount_read;
 	FILE *fp = fopen(path.c_str(),"r"); //open the png file
 	if(fp) { //make sure the file exists
@@ -145,19 +145,19 @@ int split(string to_share, int share)
 {
 	int number = 0;
 	string temp;
-
+	
 	for(int i=0; i < share; i++)
 	{
 		temp = to_share.substr(0, to_share.find(","));
 		to_share.erase(0, to_share.find(",") +1);
-
+		
 		if(i == share -1)
 		{
 			number = atoi(temp.c_str());
 			break;
 		}
 	}
-
+	
 	return number;
 }
 
@@ -188,23 +188,18 @@ void theme(string path)
 	Theme.dialog_background			= load_data(Theme.dialog_background			, path + "dialog_background.png");
 	Theme.throbber					= load_data(Theme.throbber					, path + "throbber.png");
 	Theme.choice					= load_data(Theme.choice					, path + "choice.png");
-	Theme.choice					= load_data(Theme.choice				,path + "choice_large.png");
 	Theme.sd_active					= load_data(Theme.sd_active					, path + "sd_active.png");
 	Theme.sd_inactive				= load_data(Theme.sd_inactive				, path + "sd_inactive.png");
 	Theme.usb_active				= load_data(Theme.usb_active				, path + "usb_active.png");
 	Theme.usb_inactive				= load_data(Theme.usb_inactive				, path + "usb_inactive.png");
 	Theme.sd_usb_active				= load_data(Theme.sd_usb_active				, path + "sd_usb_active.png");
 	Theme.sd_usb_inactive			= load_data(Theme.sd_usb_inactive			, path + "sd_usb_inactive.png");
-	Theme.dvd_active				= load_data(Theme.dvd_active				, path + "dvd_active.png");
-	Theme.dvd_inactive			= load_data(Theme.dvd_inactive			, path + "dvd_inactive.png");
-	Theme.all_active				= load_data(Theme.all_active				, path + "all_active.png");
-	Theme.all_inactive			= load_data(Theme.all_inactive			, path + "all_inactive.png");
-	Theme.loader_active			= load_data(Theme.loader_active			, path + "loader_active.png");
-	Theme.loader_inactive			= load_data(Theme.loader_inactive		, path + "loader_inactive.png");
 	Theme.wii_active				= load_data(Theme.wii_active				, path + "wii_active.png");
 	Theme.wii_inactive				= load_data(Theme.wii_inactive				, path + "wii_inactive.png");
 	Theme.gc_active					= load_data(Theme.gc_active					, path + "gc_active.png");
 	Theme.gc_inactive				= load_data(Theme.gc_inactive				, path + "gc_inactive.png");
+	Theme.pc_active					= load_data(Theme.pc_active					, path + "pc_active.png");
+	Theme.pc_inactive				= load_data(Theme.pc_inactive				, path + "pc_inactive.png");
 	Theme.wii_gc_active				= load_data(Theme.wii_gc_active				, path + "wii_gc_active.png");
 	Theme.wii_gc_inactive			= load_data(Theme.wii_gc_inactive			, path + "wii_gc_inactive.png");
 	Theme.power_active				= load_data(Theme.power_active				, path + "power_active.png");
@@ -227,6 +222,11 @@ void theme(string path)
 	Theme.player_grab				= load_data(Theme.player_grab				, path + "player_grab.png");
 	Theme.bg_options				= load_data(Theme.bg_options				, path + "bg_options.png");
 	Theme.bg_options_entry			= load_data(Theme.bg_options_entry			, path + "bg_options_entry.png");
+	Theme.bar						= load_data(Theme.bar						, path + "bar.png");
+	Theme.desktop					= load_data(Theme.desktop					, path + "desktop.png");
+	Theme.startmenu					= load_data(Theme.startmenu					, path + "startmenu.png");
+	Theme.startmenu_top				= load_data(Theme.startmenu_top				, path + "startmenu_top.png");
+	Theme.menu_selection			= load_data(Theme.menu_selection			, path + "menu_selection.png");
 	Theme.scrollbar					= load_data(Theme.scrollbar					, path + "scrollbar.png");
 	Theme.scrollbar_arrowdown		= load_data(Theme.scrollbar_arrowdown		, path + "scrollbar_arrowdown.png");
 	Theme.scrollbar_arrowdown_over	= load_data(Theme.scrollbar_arrowdown_over	, path + "scrollbar_arrowdown_over.png");
@@ -247,80 +247,80 @@ void theme(string path)
 		fseek (fp , 0, SEEK_END);
 		long settings_size = ftell (fp);
 		rewind (fp);
-
+		
 		if (settings_size > 0)
 		{
 			tree = mxmlLoadFile(NULL, fp, MXML_NO_CALLBACK);
 			fclose(fp);
-
+			
 			data = mxmlFindElement(tree, tree, "#color#", NULL, NULL, MXML_DESCEND);
-
+			
 			if (mxmlElementGetAttr(data,"category")) {
 				Theme.category_1 = split(mxmlElementGetAttr(data,"category"), 1);
 				Theme.category_2 = split(mxmlElementGetAttr(data,"category"), 2);
 				Theme.category_3 = split(mxmlElementGetAttr(data,"category"), 3);
 			}
-
+			
 			if (mxmlElementGetAttr(data,"page")) {
 				Theme.page_1 = split(mxmlElementGetAttr(data,"page"), 1);
 				Theme.page_2 = split(mxmlElementGetAttr(data,"page"), 2);
 				Theme.page_3 = split(mxmlElementGetAttr(data,"page"), 3);
 			}
-
+			
 			if (mxmlElementGetAttr(data,"owner")) {
 				Theme.owner_1 = split(mxmlElementGetAttr(data,"owner"), 1);
 				Theme.owner_2 = split(mxmlElementGetAttr(data,"owner"), 2);
 				Theme.owner_3 = split(mxmlElementGetAttr(data,"owner"), 3);
 			}
-
+			
 			if (mxmlElementGetAttr(data,"title")) {
 				Theme.title_1 = split(mxmlElementGetAttr(data,"title"), 1);
 				Theme.title_2 = split(mxmlElementGetAttr(data,"title"), 2);
 				Theme.title_3 = split(mxmlElementGetAttr(data,"title"), 3);
 			}
-
+			
 			if (mxmlElementGetAttr(data,"program_name")) {
 				Theme.program_name_1 = split(mxmlElementGetAttr(data,"program_name"), 1);
 				Theme.program_name_2 = split(mxmlElementGetAttr(data,"program_name"), 2);
 				Theme.program_name_3 = split(mxmlElementGetAttr(data,"program_name"), 3);
 			}
-
+			
 			if (mxmlElementGetAttr(data,"apps")) {
 				Theme.apps_1 = split(mxmlElementGetAttr(data,"apps"), 1);
 				Theme.apps_2 = split(mxmlElementGetAttr(data,"apps"), 2);
 				Theme.apps_3 = split(mxmlElementGetAttr(data,"apps"), 3);
 			}
-
+			
 			if (mxmlElementGetAttr(data,"text")) {
 				Theme.text_1 = split(mxmlElementGetAttr(data,"text"), 1);
 				Theme.text_2 = split(mxmlElementGetAttr(data,"text"), 2);
 				Theme.text_3 = split(mxmlElementGetAttr(data,"text"), 3);
 			}
-
+			
 			if (mxmlElementGetAttr(data,"button_small_text")) {
 				Theme.button_small_text_1 = split(mxmlElementGetAttr(data,"button_small_text"), 1);
 				Theme.button_small_text_2 = split(mxmlElementGetAttr(data,"button_small_text"), 2);
 				Theme.button_small_text_3 = split(mxmlElementGetAttr(data,"button_small_text"), 3);
 			}
-
+			
 			if (mxmlElementGetAttr(data,"button_tiny_text")) {
 				Theme.button_tiny_text_1 = split(mxmlElementGetAttr(data,"button_tiny_text"), 1);
 				Theme.button_tiny_text_2 = split(mxmlElementGetAttr(data,"button_tiny_text"), 2);
 				Theme.button_tiny_text_3 = split(mxmlElementGetAttr(data,"button_tiny_text"), 3);
 			}
-
+			
 			if (mxmlElementGetAttr(data,"progressbar_color1")) {
 				Theme.progressbar_color1_1 = split(mxmlElementGetAttr(data,"progressbar_color1"), 1);
 				Theme.progressbar_color1_2 = split(mxmlElementGetAttr(data,"progressbar_color1"), 2);
 				Theme.progressbar_color1_3 = split(mxmlElementGetAttr(data,"progressbar_color1"), 3);
 			}
-
+			
 			if (mxmlElementGetAttr(data,"progressbar_color2")) {
 				Theme.progressbar_color2_1 = split(mxmlElementGetAttr(data,"progressbar_color2"), 1);
 				Theme.progressbar_color2_2 = split(mxmlElementGetAttr(data,"progressbar_color2"), 2);
 				Theme.progressbar_color2_3 = split(mxmlElementGetAttr(data,"progressbar_color2"), 3);
 			}
-
+			
 			mxmlDelete(data);
 			mxmlDelete(tree);
 		}
@@ -338,11 +338,11 @@ bool theme_folder_exists(string theme)
 	DIR *pDir;
 
 	folder_exists();
-	pDir = opendir(check_path(Settings.device_dat + ":/config/HBF/Themes").c_str());
+	pDir = opendir(check_path(Settings.device_dat + ":/config/Homebrew Filter/Themes").c_str());
 
 	if(pDir != NULL)
 	{
-		pDir = opendir(check_path(Settings.device_dat + ":/config/HBF/Themes/" + theme).c_str());
+		pDir = opendir(check_path(Settings.device_dat + ":/config/Homebrew Filter/Themes/" + theme).c_str());
 		if(pDir != NULL)
 		{
 			closedir (pDir);
@@ -350,7 +350,7 @@ bool theme_folder_exists(string theme)
 		}
 		else
 		{
-			if (mkdir((Settings.device_dat + ":/config/HBF/Themes/" + theme).c_str(), 0777) != -1)
+			if (mkdir((Settings.device_dat + ":/config/Homebrew Filter/Themes/" + theme).c_str(), 0777) != -1)
 			{
 				closedir (pDir);
 				return true;
@@ -359,9 +359,9 @@ bool theme_folder_exists(string theme)
 	}
 	else
 	{
-		if (mkdir((Settings.device_dat + ":/config/HBF/Themes").c_str(), 0777) != -1)
+		if (mkdir((Settings.device_dat + ":/config/Homebrew Filter/Themes").c_str(), 0777) != -1)
 		{
-			if (mkdir((Settings.device_dat + ":/config/HBF/Themes/" + theme).c_str(), 0777) != -1)
+			if (mkdir((Settings.device_dat + ":/config/Homebrew Filter/Themes/" + theme).c_str(), 0777) != -1)
 			{
 				closedir (pDir);
 				return true;

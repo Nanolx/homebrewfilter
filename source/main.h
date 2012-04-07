@@ -17,7 +17,7 @@
 #include "Tools/theme.h"
 #include "Tools/translate.h"
 #include "Tools/fileop.h"
-#include "../svnrev/svnrev.h"
+#include "../../svnrev/svnrev.h"
 
 #define HW_REG_BASE   0xcd800000
 #define HW_ARMIRQMASK (HW_REG_BASE + 0x03c)
@@ -48,6 +48,7 @@ public:
 extern std::vector<homebrew_list> vechomebrew_list_category[99];
 extern std::vector<homebrew_list> vechomebrew_list_unassigned;
 extern std::vector<homebrew_list> vechomebrew_list_choice;
+extern std::vector<homebrew_list> vechomebrew_list_pc;
 
 class app_ios
 {
@@ -68,7 +69,6 @@ struct SSettings
 	string	device;
 	int		sd_insert;
 	int		usb_insert;
-	int		dvd_insert;
 	string	category_name_all;
 	string	category_name;
 	char	new_category_name[256];
@@ -90,15 +90,10 @@ struct SSettings
 	int		Apps_from;
 	int		Apps_to;
 	
-	bool	grid;
+	int		view;
 	bool	unassigned;
 	int		system;					// 0 = GC  /  1 = Wii  /  2 = Wii/GC
 	
-	int		temp_width;
-	int		temp_height;
-	int		temp_horizontal;
-	int		temp_vertical;
-
 	int		left, right, bottom, top;
 };
 extern struct SSettings Settings;
@@ -118,10 +113,10 @@ struct SOptions
 	char		theme[256];
 	char		language[256];
 	char		font[256];
-	int		apps;
+	int			apps;
 	bool		quick_start;
 	bool		show_all;
-	int		device_icon;
+	int			device_icon;
 	bool		navigation;
 	bool		network;
 	bool		newrevtext;
