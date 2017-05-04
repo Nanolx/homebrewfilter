@@ -25,7 +25,7 @@ INCLUDES	:=	$(DEVKITPRO)/libogc
 # options for code generation
 #---------------------------------------------------------------------------------
 
-CFLAGS	= -save-temps -g -O2 -Wall $(MACHDEP) $(INCLUDE)
+CFLAGS	= -save-temps -g -O2 -Wall -Wno-unused-variable $(MACHDEP) $(INCLUDE)
 CXXFLAGS	=	$(CFLAGS)
 ASFLAGS = $(INCLUDE) -D_LANGUAGE_ASSEMBLY
 
