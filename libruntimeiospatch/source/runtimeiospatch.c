@@ -24,7 +24,7 @@
 #define MEM_REG_BASE 0xd8b4000
 #define MEM_PROT (MEM_REG_BASE + 0x20a)
 
-void TextColor(u32 color, u8 bold)
+void TextColor(u8 color, u8 bold)
 {
 	/* Set foreground color */
 	printf("\x1b[%u;%um", color + 30, bold);
