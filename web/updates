@@ -1,3 +1,82 @@
+//rev47:
+- build against libruntimeiospatch 1.5.3
+- rename "SD Gecko" to "SD Card Debug Log" in Settings
+- rename "Wifi Gecko" to "Wifi Debug Log" in Settings
+- only scan list of available IOS once per session
+- disable 'SD Card Gecko' by default (debug log on SD Card),
+  because it's causing a MASSIVE slow down when opening an
+  app's details dialog the first time in a session, when
+  using a shitty class 2 or whatever SD Card
+- fixed that newly build vWii forwarder accidently was the
+  same than the Wii forwarder
+- fixup BootMii (IOS) detection on Wii
+- fixup showing device icon for apps
+- add ISO0 (any version) to list of known stub IOS
+  (it's a custom IOS installed by several old apps)
+- update german translation
+
+//rev46:
+- fix size and layout of device prompt in vWii builds
+- remove 'All' button from device prompt in vWii builds
+- re-enable 'SD Gecko' setting in vWii builds
+- support for Wii U Pro Controller trough FIX94's libwupc
+- support for Wii U Pro Controller in the installer
+- treat Y button on Game Cube Controller, Classic Controller
+  and Wii U Pro Controller like 1 button on the Wii Remote
+- treat X button on Game Cube Controller, Classic Controller
+  and Wii U Pro Controller like 2 button on the Wii Remote
+- press Z on Game Cube Controller or L Classic Controller or
+  Wii U Pro Controller to open Settings menu
+- press R on Classic Controller or Wii U Pro Controller to
+  open External Applications menu (no unused button left for
+  Game Cube Controller)
+- press ZL on the Classic Controller or Wii U Pro Controller to
+  open the device selection prompt (no unused button left for
+  Game Cube Controller)
+- press ZR on the Classic Controller or Wii U Pro Controller to
+  open the system selection prompt (no unused button left for
+  Game Cube Controller) [only on Wii]
+- previously only the first controller was honoured, now all
+  four are being connected, though only the first one of each
+  kind (Wii Remote, Game Cube Controller or Wii U Pro Controller)
+  can be used, each additional non-unique controller is ignored
+- in partition mounter replace debug_printf with xprintf
+- disable several DVD and Memory Card related functions in vWii
+- don't initialize DVD drive on start in vWii builds
+- allow 'SD Gecko' and 'Wifi Gecko' in parallel
+- update german translation
+
+//rev45:
+- built against libruntimeiospatch 1.5.2
+- fixed loading newly downloaded HomebrewFilter from online
+  update of standalone builds
+- always return 0 (not found) for bootmii on vWii
+- add IOS5 rev 65280 to list of stub IOS
+- fix Settings Editor GUI path for SD Gecko in GC MC Slot A
+- fix 'Exit to Wii U menu' not visible in vWii builds
+- hide 'SD Gecko' setting in vWii builds
+- various Makefile improvements
+- other minor or internal changes
+
+//rev44:
+- built against libruntimeiospatch 1.5.1
+- apply XFLAGS (flag specifying build-type (Wii/vWii,
+  installer/forwarder) to CXXFLAGS not just CFLAGS
+  * this will speed up HBF on vWii.
+    x only the first time you choose an application will
+      delay 1 or 2 seconds (as we are scanning all available
+      IOSes, for you to choose a different IOS to start an
+      application with, before it always delayed)
+    x same for external launchers menu
+    x no more delay when opening the settings
+  * this will fix upgrading HBF via network on vWii.
+    x previously it was accidently downloading the Wii version
+  * this will fix upgrading standalone HBF via network.
+    x previously it was accidently downloading the installer
+  * ... yeah, one variable, huge impact ...
+- move creation of distribution files into dist/
+- bump channel version to 44 (accidently skipped for 43)
+
 //rev43:
 - added chinese translation and font file (thanks to kavid)
 - fixed downloading japanese font file from server

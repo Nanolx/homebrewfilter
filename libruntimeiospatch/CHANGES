@@ -1,5 +1,14 @@
+1.5.3:
+* changed layout of debug text to ensure it's always visible
+* added colors to debug text
+  - cyan: headings
+  - green: patch succeeded
+  - red: patch failed
+
 1.5.2:
-* added SSL module patches made by FIX94 to fix some certificate errors that occur when attempting to connect to a host using a secure connection (DarkMatterCore)
+* added SSL module patches made by FIX94 to fix some certificate
+  errors that occur when attempting to connect to a host using a
+  secure connection (DarkMatterCore)
 
 1.5.1:
 * code clean-up (JoostinOnline)
@@ -7,7 +16,9 @@
 * misc minor changes (JoostinOnline)
 
 1.5:
-* add ISFS_SetAttr() patches. (megazig) Forces the ISFS_SetAttr() function to continue instead of returning -102 when you're trying to change the UID/GID of a file.
+* add ISFS_SetAttr() patches. (megazig)
+  Forces the ISFS_SetAttr() function to continue instead of
+  returning -102 when you're trying to change the UID/GID of a file.
 
 1.4:
 * fix value for hash_old (spotted by DarkMatterCore)

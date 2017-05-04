@@ -5,6 +5,7 @@
 #include <sstream>
 #include <vector>
 #include <wiiuse/wpad.h>
+#include <wupc/wupc.h>
 
 #include "getios.h"
 #include "menu.h"
@@ -35,15 +36,15 @@ void show_menu_head()
 {
 	Con_FgColor(6, 1);
 	printf("\x1b[%i;%iH", startpos_x, startpos_y);
-	printf("HBF installer v0.4");
+	printf("HBF installer v0.5");
 
 	Con_FgColor(7, 1);
-	printf("\t\t\t\t\t(C) 2011");
+	printf("\t\t\t\t\t(C) 2011      ");
 	Con_FgColor(6, 1);
 	printf(" hamachi-mp");
 
 	Con_FgColor(7, 1);
-	printf("\n\t\t\t\t\t\t\t\t\t\t\t\t(C) 2012");
+	printf("\n\t\t\t\t\t\t\t\t\t\t\t\t(C) 2012, 2016");
 	Con_FgColor(6, 1);
 	printf(" Nano & Obcd");
 }
@@ -164,11 +165,13 @@ int menu_main(int scrollpos)
 	bool scroll = true;
 	while(1)
 	{
+		WUPC_UpdateButtonStats();
 		WPAD_ScanPads();
 		PAD_ScanPads();
 
 		if((WPAD_ButtonsDown(0) & (WPAD_BUTTON_DOWN | WPAD_CLASSIC_BUTTON_DOWN)
-			|| (PAD_ButtonsDown(0) & PAD_BUTTON_DOWN)) && scrollpos < (signed)text1.size() -1)
+			|| (PAD_ButtonsDown(0) & PAD_BUTTON_DOWN)
+			|| (WUPC_ButtonsDown(0) & WPAD_CLASSIC_BUTTON_DOWN)) && scrollpos < (signed)text1.size() -1)
 		{
 			scrollpos++;
 			while(text1[scrollpos] == "")
@@ -180,7 +183,8 @@ int menu_main(int scrollpos)
 				Pad_unpressed();
 		}
 		else if((WPAD_ButtonsDown(0) & (WPAD_BUTTON_UP | WPAD_CLASSIC_BUTTON_UP)
-			|| (PAD_ButtonsDown(0) & PAD_BUTTON_UP)) && scrollpos != 0)
+			|| (PAD_ButtonsDown(0) & PAD_BUTTON_UP)
+			|| (WUPC_ButtonsDown(0) & WPAD_CLASSIC_BUTTON_UP)) && scrollpos != 0)
 		{
 			scrollpos--;
 			while(text1[scrollpos] == "")
@@ -206,7 +210,9 @@ int menu_main(int scrollpos)
 			scroll = false;
 		}
 
-		if(WPAD_ButtonsDown(0) & (WPAD_BUTTON_A | WPAD_CLASSIC_BUTTON_A) || PAD_ButtonsDown(0) & PAD_BUTTON_A)
+		if(WPAD_ButtonsDown(0) & (WPAD_BUTTON_A | WPAD_CLASSIC_BUTTON_A)
+		   || PAD_ButtonsDown(0) & PAD_BUTTON_A
+		   || WUPC_ButtonsDown(0) & WPAD_CLASSIC_BUTTON_A)
 		{
 			menu_main_choice = scrollpos;
 			switch(scrollpos)
@@ -254,11 +260,13 @@ int menu_install_uninstall(int install)
 	bool scroll = true;
 	while(1)
 	{
+		WUPC_UpdateButtonStats();
 		WPAD_ScanPads();
 		PAD_ScanPads();
 
 		if((WPAD_ButtonsDown(0) & (WPAD_BUTTON_DOWN | WPAD_CLASSIC_BUTTON_DOWN)
-			|| (PAD_ButtonsDown(0) & PAD_BUTTON_DOWN)) && scrollpos < (signed)text2.size() -1)
+			|| (PAD_ButtonsDown(0) & PAD_BUTTON_DOWN)
+			|| (WUPC_ButtonsDown(0) & WPAD_CLASSIC_BUTTON_DOWN)) && scrollpos < (signed)text2.size() -1)
 		{
 			scrollpos++;
 			scroll = true;
@@ -267,7 +275,8 @@ int menu_install_uninstall(int install)
 				Pad_unpressed();
 		}
 		else if((WPAD_ButtonsDown(0) & (WPAD_BUTTON_UP | WPAD_CLASSIC_BUTTON_UP)
-			|| (PAD_ButtonsDown(0) & PAD_BUTTON_UP)) && scrollpos != 0)
+			|| (PAD_ButtonsDown(0) & PAD_BUTTON_UP)
+			|| (WUPC_ButtonsDown(0) & WPAD_CLASSIC_BUTTON_UP)) && scrollpos != 0)
 		{
 			scrollpos--;
 			scroll = true;
@@ -290,7 +299,9 @@ int menu_install_uninstall(int install)
 			scroll = false;
 		}
 
-		if( WPAD_ButtonsDown(0) & (WPAD_BUTTON_A | WPAD_CLASSIC_BUTTON_A) || PAD_ButtonsDown(0) & PAD_BUTTON_A )
+		if(WPAD_ButtonsDown(0) & (WPAD_BUTTON_A | WPAD_CLASSIC_BUTTON_A)
+		   || PAD_ButtonsDown(0) & PAD_BUTTON_A
+		   || WUPC_ButtonsDown(0) & WPAD_CLASSIC_BUTTON_A)
 		{
 			switch(scrollpos)
 			{
@@ -363,10 +374,13 @@ int menu_install()
 
 	while(1)
 	{
+		WUPC_UpdateButtonStats();
 		WPAD_ScanPads();
 		PAD_ScanPads();
 
-		if( WPAD_ButtonsDown(0) & (WPAD_BUTTON_A | WPAD_CLASSIC_BUTTON_A) || PAD_ButtonsDown(0) & PAD_BUTTON_A )
+		if(WPAD_ButtonsDown(0) & (WPAD_BUTTON_A | WPAD_CLASSIC_BUTTON_A)
+		   || PAD_ButtonsDown(0) & PAD_BUTTON_A
+		   || WUPC_ButtonsDown(0) & WPAD_CLASSIC_BUTTON_A)
 			return MENU_MAIN;
 	}
 }
@@ -430,9 +444,12 @@ int menu_reinstall()
 
 	while(1)
 	{
+		WUPC_UpdateButtonStats();
 		WPAD_ScanPads();
 		PAD_ScanPads();
-		if( WPAD_ButtonsDown(0) & (WPAD_BUTTON_A | WPAD_CLASSIC_BUTTON_A) || PAD_ButtonsDown(0) & PAD_BUTTON_A )
+		if(WPAD_ButtonsDown(0) & (WPAD_BUTTON_A | WPAD_CLASSIC_BUTTON_A)
+		   || PAD_ButtonsDown(0) & PAD_BUTTON_A
+		   || WUPC_ButtonsDown(0) & WPAD_CLASSIC_BUTTON_A)
 			return MENU_MAIN;
 	}
 
@@ -455,9 +472,12 @@ int menu_uninstall()
 
 	while(1)
 	{
+		WUPC_UpdateButtonStats();
 		WPAD_ScanPads();
 		PAD_ScanPads();
-		if( WPAD_ButtonsDown(0) & (WPAD_BUTTON_A | WPAD_CLASSIC_BUTTON_A) || PAD_ButtonsDown(0) & PAD_BUTTON_A )
+		if(WPAD_ButtonsDown(0) & (WPAD_BUTTON_A | WPAD_CLASSIC_BUTTON_A)
+		   || PAD_ButtonsDown(0) & PAD_BUTTON_A
+		   || WUPC_ButtonsDown(0) & WPAD_CLASSIC_BUTTON_A)
 			return MENU_MAIN;
 	}
 }
@@ -480,10 +500,13 @@ int menu_copyright()
 
 	while(1)
 	{
+		WUPC_UpdateButtonStats();
 		WPAD_ScanPads();
 		PAD_ScanPads();
 
-		if( WPAD_ButtonsDown(0) & (WPAD_BUTTON_A | WPAD_CLASSIC_BUTTON_A) || PAD_ButtonsDown(0) & PAD_BUTTON_A )
+		if(WPAD_ButtonsDown(0) & (WPAD_BUTTON_A | WPAD_CLASSIC_BUTTON_A)
+		   || PAD_ButtonsDown(0) & PAD_BUTTON_A
+		   || WUPC_ButtonsDown(0) & WPAD_CLASSIC_BUTTON_A)
 			return MENU_MAIN;
 	}
 }

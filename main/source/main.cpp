@@ -92,7 +92,7 @@ void addAppIos(string foldername, int ios)
 		}
 		if(found)
 			appios[i].ios = ios;
-		if(!found)
+		else
 			appios.push_back(app_ios(foldername, ios));
 	}
 }
@@ -106,7 +106,9 @@ void ExitApp()
 	save();
 	xprintf("Unmount Devices and NAND\n");
 	UnmountAllDevices();
+#ifndef VWII
 	exit_uneek_fs();
+#endif
 	ISFS_Deinitialize();
 }
 
@@ -177,7 +179,7 @@ DefaultOptions()
 	Options.apps		= 4;
 	Options.quick_start	= 0;
 	Options.show_all	= 1;
-	Options.sdgecko		= 1;
+	Options.sdgecko		= 0;
 #ifndef VWII
 	Options.bootmii_boot2   = 0;
 #endif
@@ -197,7 +199,9 @@ main(int argc, char *argv[])
 	SetupPads();			// Initialize input
 	InitGUIThreads();		// Initialize GUI
 
+#ifndef VWII
 	in_neek = init_uneek_fs(ISFS_OPEN_READ|ISFS_OPEN_WRITE);
+#endif
 
 	MountAllDevices();
 	InitNetworkThread();	// Initialize Network
@@ -207,7 +211,7 @@ main(int argc, char *argv[])
 		InitGeckoThread();
 #endif
 	InitThrobberThread();	// Initialize Throbber
-	ISFS_Initialize();		// Initialize Nand
+	ISFS_Initialize();	// Initialize Nand
 
 	LoadHBF();
 
@@ -248,18 +252,16 @@ main(int argc, char *argv[])
 	strftime(buffer, 80, "(%Y-%m-%d / %H:%M:%S)", current);
 	xprintf("\nStarting HBF Debug Log %s\n", buffer);
 
+#ifndef VWII
 	if(!check_uneek_fs())
-	{
+#endif
 		if(AHBPROT_DISABLED)
 		{
 			IosPatch_RUNTIME(true, false, false, false);
 		}
-		else
-		{
-			xprintf("Warning: no AHBPROT\n");
-		}
-	}
+#ifndef VWII
 	DI2_Init(); // Init DVD
+#endif
 
 	if(strstr(Options.language, tr("STANDARD")))
 		translate();
@@ -292,8 +294,12 @@ main(int argc, char *argv[])
             xprintf("Setting force_reload to NORELOAD\n");
             Settings.force_reload = "NORELOAD";
             xprintf("Loading boot.dol from online update\n");
-#ifdef VWII
+#ifdef STBOOTVWII
+            LoadHomebrew ((Settings.device_dat + ":/apps/HomebrewFilter.vWii.Standalone/boot.dol").c_str());
+#elif VWII
             LoadHomebrew ((Settings.device_dat + ":/apps/HomebrewFilter.vWii/boot.dol").c_str());
+#elif STBOOT
+            LoadHomebrew ((Settings.device_dat + ":/apps/HomebrewFilter.Standalone/boot.dol").c_str());
 #else
             LoadHomebrew ((Settings.device_dat + ":/apps/HomebrewFilter/boot.dol").c_str());
 #endif

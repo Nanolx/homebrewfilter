@@ -9,7 +9,7 @@
 
 // Copyright (C) 2010		Joseph Jordan <joe.ftpii@psychlaw.com.au>
 // Copyright (C) 2012-2013	damysteryman
-// Copyright (C) 2012-2013	Christopher Bratusek <nano@tuxfamily.org>
+// Copyright (C) 2012-2015	Christopher Bratusek <nano@jpberlin.de>
 // Copyright (C) 2013		DarkMatterCore
 // Copyright (C) 2014		megazig
 // Copyright (C) 2015		FIX94
@@ -20,7 +20,7 @@
 /**
  * Version information for Libruntimeiospatch.
  */
-#define LIB_RUNTIMEIOSPATCH_VERSION "1.5.2"
+#define LIB_RUNTIMEIOSPATCH_VERSION "1.5.3"
 
 //==============================================================================
 // HW_RVL header
@@ -63,6 +63,7 @@ Wii:
     * ES SetIdentify
     * Hash Check (aka Trucha)
     * New Hash Check (aka New Trucha)
+    * SSL patches
 
 Sciifii:
     * MEM2 Prot

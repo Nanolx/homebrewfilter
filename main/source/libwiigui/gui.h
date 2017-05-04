@@ -41,6 +41,7 @@
 #include <math.h>
 #include <asndlib.h>
 #include <wiiuse/wpad.h>
+#include <wupc/wupc.h>
 #include "pngu.h"
 #include "FreeTypeGX.h"
 #include "video.h"
@@ -117,6 +118,16 @@ typedef struct _paddata {
 	u8 triggerR;
 } PADData;
 
+typedef struct _wupcfulldata {
+	u32 btns_d;
+	u32 btns_u;
+	u32 btns_h;
+	s16 stickX;
+	s16 stickY;
+	s16 substickX;
+	s16 substickY;
+} WUPCFullData;
+
 typedef struct _POINT {
 	s32 x;
 	s32 y;
@@ -183,6 +194,8 @@ class GuiTrigger
 		s32 chan; //!< Trigger controller channel (0-3, -1 for all)
 		WPADData * wpad; //!< Wii controller trigger
 		WPADData wpaddata; //!< Wii controller trigger data
+		WUPCFullData * wupad; //!< WiiU Pro controller trigger
+		WUPCFullData wupcdata; //!< WiiU Pro controller trigger data
 		PADData pad; //!< GameCube controller trigger data
 };
 

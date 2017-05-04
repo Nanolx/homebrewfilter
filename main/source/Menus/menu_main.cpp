@@ -409,7 +409,7 @@ int MenuMain()
 		// device symbol anzeigen
 		GuiImage * viewdevice = NULL;
 
-		if((Options.device_icon == 1 || Options.device_icon == 3) && (Settings.device == "sd_usb" || Settings.device == "all"))
+		if(Options.device_icon == 1 || Options.device_icon == 3)
 		{
 			bool icon = false;
 			if(strncmp(vechomebrew_list_choice[i].foldername.c_str(), "sd", 2) == 0)
@@ -639,7 +639,9 @@ int MenuMain()
 		if(mainWindow->GetState() != STATE_DISABLED)
 		{
 			// Sortieren
-			if(WPAD_ButtonsDown(0) & WPAD_BUTTON_1 && Settings.current_category != 0)
+			if((WPAD_ButtonsDown(0) & (WPAD_BUTTON_1 | WPAD_CLASSIC_BUTTON_Y) && Settings.current_category != 0)
+			   || (WUPC_ButtonsDown(0) & WPAD_CLASSIC_BUTTON_Y && Settings.current_category != 0)
+			   || (PAD_ButtonsDown(0) & PAD_BUTTON_Y && Settings.current_category != 0))
 			{
 				switch (sortPrompt())
 				{
@@ -676,19 +678,10 @@ int MenuMain()
 
 					if(!first)
 					{
-						if (Options.sdgecko)
-						{
-							xprintf("The HomebrewFilter rev%i\n= == == == == == == == =\nSD Card Gecko initialized.\n\n", SvnRev());
-						}
-						else if(Options.wifigecko)
-						{
+						if(Options.wifigecko)
 							WifiGecko_Connect();
-							xprintf("The HomebrewFilter rev%i\n= == == == == == == == =\nWifi Gecko connected.\n\n", SvnRev());
-						}
-						else
-						{
-							xprintf("The HomebrewFilter rev%i\n= == == == == == == == =\nUSB Gecko initialized.\n\n", SvnRev());
-						}
+
+						xprintf("The HomebrewFilter rev%i\n= == == == == == == == =\n\n", SvnRev());
 						first = true;
 					}
 
@@ -720,7 +713,10 @@ int MenuMain()
 				menu = MENU_EXIT;
 
 			// ansicht wechseln
-			if(((WPAD_ButtonsDown(0) & WPAD_BUTTON_2) &! (WPAD_ButtonsDown(0) & WPAD_BUTTON_1)) || normal_grid_Btn.GetState() == STATE_CLICKED)
+			if(WPAD_ButtonsDown(0) & (WPAD_BUTTON_2 | WPAD_CLASSIC_BUTTON_X) ||
+			   WUPC_ButtonsDown(0) & WPAD_CLASSIC_BUTTON_X ||
+			   PAD_ButtonsDown(0) & PAD_BUTTON_X ||
+			   normal_grid_Btn.GetState() == STATE_CLICKED)
 			{
 				Settings.current_page = 1;
 				if(Settings.grid)
@@ -732,21 +728,26 @@ int MenuMain()
 			}
 
 			// wenn A gedrckt
-			if(WPAD_ButtonsDown(0) & (WPAD_BUTTON_A | WPAD_CLASSIC_BUTTON_A) || PAD_ButtonsDown(0) & PAD_BUTTON_A)
+			if(WPAD_ButtonsDown(0) & (WPAD_BUTTON_A | WPAD_CLASSIC_BUTTON_A) || PAD_ButtonsDown(0) & PAD_BUTTON_A
+			  || WUPC_ButtonsDown(0) & WPAD_CLASSIC_BUTTON_A)
 				button = "A";
 
 			// wenn B gedrckt
-			if(WPAD_ButtonsDown(0) & (WPAD_BUTTON_B | WPAD_CLASSIC_BUTTON_B) || PAD_ButtonsDown(0) & PAD_BUTTON_B)
+			if(WPAD_ButtonsDown(0) & (WPAD_BUTTON_B | WPAD_CLASSIC_BUTTON_B) || PAD_ButtonsDown(0) & PAD_BUTTON_B
+			  || WUPC_ButtonsDown(0) & WPAD_CLASSIC_BUTTON_B)
 				button = "B";
 
 			// Settings
-			if(settings_Btn.GetState() == STATE_CLICKED)
+			if(settings_Btn.GetState() == STATE_CLICKED || WPAD_ButtonsDown(0) & WPAD_CLASSIC_BUTTON_FULL_L
+			      || PAD_ButtonsDown(0) & PAD_TRIGGER_Z || WUPC_ButtonsDown(0) & WPAD_CLASSIC_BUTTON_FULL_L)
 			{
 				menu = MENU_SETTINGS;
 			}
 
 			// SD, USB
-			else if(sd_usb_Btn.GetState() == STATE_CLICKED 	|| Settings.sd_insert == -1 || Settings.sd_insert == 2
+			else if(sd_usb_Btn.GetState() == STATE_CLICKED 	|| WPAD_ButtonsDown(0) & WPAD_CLASSIC_BUTTON_ZL
+									|| WUPC_ButtonsDown(0) & WPAD_CLASSIC_BUTTON_ZL
+									|| Settings.sd_insert == -1  || Settings.sd_insert == 2
 									|| Settings.usb_insert == -1 || Settings.usb_insert == 2
 #ifndef VWII
 									|| Settings.dvd_insert == -1 || Settings.dvd_insert == 2
@@ -756,8 +757,7 @@ int MenuMain()
 									)
 			{
 				int device = -1;
-				if(sd_usb_Btn.GetState() == STATE_CLICKED)
-					device = devicePrompt();
+				device = devicePrompt();
 
 				if(device == 1)
 					Settings.device = "sd1";
@@ -772,9 +772,9 @@ int MenuMain()
 					Settings.device = "gca";
 				else if(device == 6)
 					Settings.device = "gcb";
-#endif
 				else if(device == 7)
 					Settings.device = "all";
+#endif
 
 				if(device != -1 || Settings.sd_insert == -1 || Settings.sd_insert == 2
 						|| Settings.usb_insert == -1 || Settings.usb_insert == 2
@@ -794,7 +794,9 @@ int MenuMain()
 			}
 #ifndef VWII
 			// Wii, GC
-			else if(wii_gc_Btn.GetState() == STATE_CLICKED)
+			else if(wii_gc_Btn.GetState() == STATE_CLICKED ||
+				   WPAD_ButtonsDown(0) & WPAD_CLASSIC_BUTTON_ZR ||
+				   WUPC_ButtonsDown(0) & WPAD_CLASSIC_BUTTON_ZR)
 			{
 				int choice = systemPrompt();
 
@@ -817,7 +819,8 @@ int MenuMain()
 #endif
 
 			// Power button
-			else if(power_Btn.GetState() == STATE_CLICKED || WPAD_ButtonsDown(0) & (WPAD_BUTTON_HOME | WPAD_CLASSIC_BUTTON_HOME) || PAD_ButtonsDown(0) & PAD_BUTTON_START)
+			else if(power_Btn.GetState() == STATE_CLICKED || WPAD_ButtonsDown(0) & (WPAD_BUTTON_HOME | WPAD_CLASSIC_BUTTON_HOME)
+			        || PAD_ButtonsDown(0) & PAD_BUTTON_START || WUPC_ButtonsDown(0) & WPAD_CLASSIC_BUTTON_HOME)
 			{
 				power_Btn.ResetState();
 				if(endPrompt() == MENU_EXIT)
@@ -825,7 +828,8 @@ int MenuMain()
 			}
 
 			// Loader button
-			else if(loader_Btn.GetState() ==  STATE_CLICKED || WPAD_ButtonsDown(0) & (WPAD_BUTTON_HOME | WPAD_CLASSIC_BUTTON_HOME) || PAD_ButtonsDown(0) & PAD_BUTTON_START)
+			else if(loader_Btn.GetState() ==  STATE_CLICKED || WPAD_ButtonsDown(0) & WPAD_CLASSIC_BUTTON_FULL_R
+			        || WUPC_ButtonsDown(0) & WPAD_CLASSIC_BUTTON_FULL_R)
 			{
 				loader_Btn.ResetState();
 				if(loaderPrompt() == MENU_EXIT)
@@ -842,26 +846,34 @@ int MenuMain()
 			// eine Seite weiter bzw zurck
 			else if((WPAD_ButtonsDown(0) & (WPAD_BUTTON_RIGHT | WPAD_CLASSIC_BUTTON_RIGHT) && !Options.navigation) ||
 					(WPAD_ButtonsDown(0) & (WPAD_BUTTON_PLUS | WPAD_CLASSIC_BUTTON_PLUS) && Options.navigation) ||
+					(WUPC_ButtonsDown(0) & WPAD_CLASSIC_BUTTON_RIGHT && !Options.navigation) ||
+					(WUPC_ButtonsDown(0) & WPAD_CLASSIC_BUTTON_PLUS && Options.navigation) ||
 					PAD_ButtonsDown(0) & PAD_BUTTON_RIGHT || rightBtn.GetState() == STATE_CLICKED ||
 					(WPAD_ButtonsDown(0) & (WPAD_BUTTON_LEFT | WPAD_CLASSIC_BUTTON_LEFT) && !Options.navigation) ||
 					(WPAD_ButtonsDown(0) & (WPAD_BUTTON_MINUS | WPAD_CLASSIC_BUTTON_MINUS) && Options.navigation) ||
+					(WUPC_ButtonsDown(0) & WPAD_CLASSIC_BUTTON_LEFT && !Options.navigation) ||
+					(WUPC_ButtonsDown(0) & WPAD_CLASSIC_BUTTON_MINUS && Options.navigation) ||
 					PAD_ButtonsDown(0) & PAD_BUTTON_LEFT || leftBtn.GetState() == STATE_CLICKED)
 			{
 				// Abbrechen Seite zurck
 				if((WPAD_ButtonsDown(0) & (WPAD_BUTTON_RIGHT | WPAD_CLASSIC_BUTTON_RIGHT) && !Options.navigation) ||
 					(WPAD_ButtonsDown(0) & (WPAD_BUTTON_PLUS | WPAD_CLASSIC_BUTTON_PLUS) && Options.navigation) ||
+					(WUPC_ButtonsDown(0) & WPAD_CLASSIC_BUTTON_RIGHT && !Options.navigation) ||
+					(WUPC_ButtonsDown(0) & WPAD_CLASSIC_BUTTON_PLUS && Options.navigation) ||
 					PAD_ButtonsDown(0) & PAD_BUTTON_RIGHT || rightBtn.GetState() == STATE_CLICKED)
 					previous_page = false;
 
 				// Abbrechen Seite weiter
 				if((WPAD_ButtonsDown(0) & (WPAD_BUTTON_LEFT | WPAD_CLASSIC_BUTTON_LEFT) && !Options.navigation) ||
 					(WPAD_ButtonsDown(0) & (WPAD_BUTTON_MINUS | WPAD_CLASSIC_BUTTON_MINUS) && Options.navigation) ||
+					(WUPC_ButtonsDown(0) & WPAD_CLASSIC_BUTTON_LEFT && !Options.navigation) ||
+					(WUPC_ButtonsDown(0) & WPAD_CLASSIC_BUTTON_MINUS && Options.navigation) ||
 					PAD_ButtonsDown(0) & PAD_BUTTON_LEFT || leftBtn.GetState() == STATE_CLICKED)
 					next_page = false;
 
 				int page = Settings.current_page;
 				bool change = false;
-				if(next_page || rightBtn.GetState() == STATE_CLICKED || (WPAD_ButtonsDown(0) & (WPAD_BUTTON_PLUS | WPAD_CLASSIC_BUTTON_PLUS) && Options.navigation))
+				if(next_page || rightBtn.GetState() == STATE_CLICKED || (WPAD_ButtonsDown(0) & (WPAD_BUTTON_PLUS | WPAD_CLASSIC_BUTTON_PLUS) && Options.navigation) || WUPC_ButtonsDown(0) & WPAD_CLASSIC_BUTTON_PLUS)
 				{
 					rightBtn.ResetState();
 					Settings.current_page++;
@@ -877,7 +889,7 @@ int MenuMain()
 						change = true;
 				}
 
-				if(previous_page || leftBtn.GetState() == STATE_CLICKED || (WPAD_ButtonsDown(0) & (WPAD_BUTTON_MINUS | WPAD_CLASSIC_BUTTON_MINUS) && Options.navigation))
+				if(previous_page || leftBtn.GetState() == STATE_CLICKED || (WPAD_ButtonsDown(0) & (WPAD_BUTTON_MINUS | WPAD_CLASSIC_BUTTON_MINUS) && Options.navigation) || WUPC_ButtonsDown(0) & WPAD_CLASSIC_BUTTON_MINUS)
 				{
 					leftBtn.ResetState();
 					Settings.current_page--;
@@ -955,6 +967,8 @@ int MenuMain()
 			// eine Kategorie weiter
 			else if((WPAD_ButtonsDown(0) & (WPAD_BUTTON_PLUS | WPAD_CLASSIC_BUTTON_PLUS) && !Options.navigation) ||
 					(WPAD_ButtonsDown(0) & (WPAD_BUTTON_RIGHT | WPAD_CLASSIC_BUTTON_RIGHT) && Options.navigation) ||
+					(WUPC_ButtonsDown(0) & WPAD_CLASSIC_BUTTON_PLUS && !Options.navigation) ||
+					(WUPC_ButtonsDown(0) & WPAD_CLASSIC_BUTTON_RIGHT && Options.navigation) ||
 					PAD_ButtonsDown(0) & PAD_TRIGGER_R || plusBtn.GetState() == STATE_CLICKED)
 			{
 				Next_Category();
@@ -964,6 +978,8 @@ int MenuMain()
 			// eine Kategorie zurck
 			else if((WPAD_ButtonsDown(0) & (WPAD_BUTTON_MINUS | WPAD_CLASSIC_BUTTON_MINUS) && !Options.navigation) ||
 					(WPAD_ButtonsDown(0) & (WPAD_BUTTON_LEFT | WPAD_CLASSIC_BUTTON_LEFT) && Options.navigation) ||
+					(WUPC_ButtonsDown(0) & WPAD_CLASSIC_BUTTON_MINUS && !Options.navigation) ||
+					(WUPC_ButtonsDown(0) & WPAD_CLASSIC_BUTTON_LEFT && Options.navigation) ||
 					PAD_ButtonsDown(0) & PAD_TRIGGER_L || minusBtn.GetState() == STATE_CLICKED)
 			{
 				Previous_Category();
@@ -1052,7 +1068,7 @@ int MenuMain()
 				if(AppsBtn[i]->GetState() == STATE_CLICKED && button == "B" && !grab)
 				{
 					AppsBtn[i]->ResetState();
-					if(Settings.current_category != 0 && strcasecmp(Settings.code,"NULL") == 0 && WPAD_ButtonsDown(0) & WPAD_BUTTON_B)
+					if(Settings.current_category != 0 && strcasecmp(Settings.code,"NULL") == 0 && (WPAD_ButtonsDown(0) & (WPAD_BUTTON_B | WPAD_CLASSIC_BUTTON_B) || WUPC_ButtonsDown(0) & WPAD_CLASSIC_BUTTON_B))
 					{
 						pointer = new GuiImageData(Theme.player_grab);
 						grab = true;
@@ -1191,7 +1207,7 @@ int MenuMain()
 				}
 
 				// wenn b losgelassen wurde
-				if(WPAD_ButtonsUp(0) & WPAD_BUTTON_B)
+				if(WPAD_ButtonsUp(0) & (WPAD_BUTTON_B | WPAD_CLASSIC_BUTTON_B) || WUPC_ButtonsUp(0) & WPAD_CLASSIC_BUTTON_B)
 				{
 					grab = false;
 					pointer = new GuiImageData(Theme.player_point);

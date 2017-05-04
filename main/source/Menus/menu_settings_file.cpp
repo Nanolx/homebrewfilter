@@ -80,7 +80,7 @@ int MenuSettingsFile()
 	sprintf(options.name[i++], tr("Device icon"));
 	sprintf(options.name[i++], tr("Wiiload IOS"));
 	sprintf(options.name[i++], tr("Wiiload IOS Reload"));
-	sprintf(options.name[i++], tr("SD Gecko"));
+	sprintf(options.name[i++], tr("SD Card Debug Log"));
 #ifndef VWII
 	sprintf(options.name[i++], tr("BootMii in Boot2"));
 #endif
@@ -150,7 +150,8 @@ int MenuSettingsFile()
 		ret = optionBrowser.GetChangedOption();
 		ret2 = optionBrowser.GetClickedOption();
 
-		if(WPAD_ButtonsDown(0) & (WPAD_BUTTON_RIGHT | WPAD_CLASSIC_BUTTON_RIGHT) || PAD_ButtonsDown(0) & PAD_BUTTON_RIGHT)
+		if(WPAD_ButtonsDown(0) & (WPAD_BUTTON_RIGHT | WPAD_CLASSIC_BUTTON_RIGHT) || PAD_ButtonsDown(0) & PAD_BUTTON_RIGHT
+		   || WUPC_ButtonsDown(0) & WPAD_CLASSIC_BUTTON_RIGHT)
 		{
 			change = 0;
 			switch (ret)
@@ -236,7 +237,8 @@ int MenuSettingsFile()
 			optionBrowser.TriggerUpdate();
 		}
 
-		if(WPAD_ButtonsDown(0) & (WPAD_BUTTON_LEFT | WPAD_CLASSIC_BUTTON_LEFT) || PAD_ButtonsDown(0) & PAD_BUTTON_LEFT)
+		if(WPAD_ButtonsDown(0) & (WPAD_BUTTON_LEFT | WPAD_CLASSIC_BUTTON_LEFT) || PAD_ButtonsDown(0) & PAD_BUTTON_LEFT
+		   || WUPC_ButtonsDown(0) & WPAD_CLASSIC_BUTTON_LEFT) 
 		{
 			change = 0;
 			switch (ret)
@@ -478,7 +480,8 @@ int MenuSettingsFile()
 			optionBrowser.TriggerUpdate();
 		}
 
-		if(WPAD_ButtonsDown(0) & (WPAD_BUTTON_B | WPAD_CLASSIC_BUTTON_B) || PAD_ButtonsDown(0) & PAD_BUTTON_B)
+		if(WPAD_ButtonsDown(0) & (WPAD_BUTTON_B | WPAD_CLASSIC_BUTTON_B) || PAD_ButtonsDown(0) & PAD_BUTTON_B
+		   || WUPC_ButtonsDown(0) & WPAD_CLASSIC_BUTTON_B)
 		{
 			if(focus == 0)
 			{

@@ -14,11 +14,11 @@ string CheckNewVersions()
 	string revs = "error";
 	char buffer[100];
 #ifdef STBOOTVWII
-		sprintf(buffer, "http://www.nanolx.org/hbf/DOL.st.vwii/revisions.st.vwii");
+		sprintf(buffer, "http://www.nanolx.org/hbf/DOL.st.vwii/revisions");
 #elif VWII
-		sprintf(buffer, "http://www.nanolx.org/hbf/DOL.vwii/revisions.vwii");
+		sprintf(buffer, "http://www.nanolx.org/hbf/DOL.vwii/revisions");
 #elif STBOOT
-		sprintf(buffer, "http://www.nanolx.org/hbf/DOL.st/revisions.st");
+		sprintf(buffer, "http://www.nanolx.org/hbf/DOL.st/revisions");
 #else
 		sprintf(buffer, "http://www.nanolx.org/hbf/DOL/revisions");
 #endif
@@ -57,7 +57,6 @@ string new_update(string rev, string filename)
 		sprintf(url, "http://www.nanolx.org/hbf/DOL.vwii/Beta/%s", filename.c_str());
 	else
 		sprintf(url, "http://www.nanolx.org/hbf/DOL.vwii/rev%s/%s", rev.c_str(), filename.c_str());
-
 #elif STBOOT
 	if(rev == "Beta")
 		sprintf(url, "http://www.nanolx.org/hbf/DOL.st/Beta/%s", filename.c_str());

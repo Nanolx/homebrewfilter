@@ -43,7 +43,7 @@ bool check_segui()
 		segui_loc = "dvd1:/apps/SettingsEditorGUI/boot.dol";
 		return true;
 	}
-	else if(opendir(check_path("gca:/apps/Settings Editor GUI/").c_str()) != NULL)
+	else if(opendir(check_path("gca:/apps/SettingsEditorGUI/").c_str()) != NULL)
 	{
 		segui_loc = "gca:/apps/SettingsEditorGUI/boot.dol";
 		return true;
@@ -83,7 +83,6 @@ loaderPrompt()
 	bool stop = false;
 	int menu = 0;
 
-	listIOS();
 #ifndef VWII
 	if( ! priicheck )
 	{
@@ -92,11 +91,7 @@ loaderPrompt()
 	}
 #endif
 	bool have_segui;
-	if( ! seguicheck )
-	{
-		seguicheck = 1;
-		have_segui = check_segui();
-	}
+	have_segui = check_segui();
 
 	GuiWindow promptWindow(520,360);
 	promptWindow.SetAlignment(ALIGN_CENTRE, ALIGN_MIDDLE);
